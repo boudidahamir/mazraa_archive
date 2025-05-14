@@ -1,0 +1,4 @@
+# config/routes.yaml
+imports:
+  - { resource: routes/attributes.yaml }
+  - { resource: routes/dev/web_profiler.yaml}

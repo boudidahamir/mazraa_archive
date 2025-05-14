@@ -1,0 +1,135 @@
+# ========================
+# Java / Spring Boot
+# ========================
+/target/
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.log
+*.tmp
+*.bak
+*.swp
+/.settings/
+/.project
+/.classpath
+/.idea/
+/*.iws
+.gradle/
+/build/
+/out/
+/logs/
+
+# Local config files
+application.yml
+application.properties
+
+# Maven
+.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+**/pom.xml.tag
+**/pom.xml.releaseBackup
+**/pom.xml.versionsBackup
+**/pom.xml.next
+**/release.properties
+
+# ========================
+# Symfony (PHP)
+# ========================
+/var/
+/vendor/
+/.env
+.env.local
+.env.*.local
+/.phpunit.result.cache
+/phpunit.xml
+/phpunit.xml.dist
+/.php_cs.cache
+/.php-cs-fixer.cache
+/.idea/
+*.log
+*.cache
+node_modules/
+
+# Symfony build artifacts
+/public/bundles/
+/public/build/
+/public/hot
+
+# Composer
+composer.lock
+
+# ========================
+# Flutter / Dart
+# ========================
+# Dart/Pub related
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.melos_tool/
+pubspec.lock
+
+# Android
+**/android/.gradle/
+**/android/app/build/
+**/android/local.properties
+**/android/.idea/
+
+# iOS
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Pods/
+**/ios/Runner.xcworkspace/
+**/ios/build/
+**/ios/.symlinks/
+**/ios/.flutter-plugins
+**/ios/.flutter-plugins-dependencies
+**/ios/.dart_tool/
+
+# Web
+**/build/web/
+
+# macOS
+**/macos/Flutter/
+**/macos/Pods/
+**/macos/.flutter-plugins
+**/macos/.flutter-plugins-dependencies
+**/macos/.dart_tool/
+**/macos/build/
+
+# Windows
+**/windows/flutter/
+**/windows/.flutter-plugins
+**/windows/.flutter-plugins-dependencies
+**/windows/.dart_tool/
+**/windows/build/
+
+# Linux
+**/linux/flutter/
+**/linux/.flutter-plugins
+**/linux/.flutter-plugins-dependencies
+**/linux/.dart_tool/
+**/linux/build/
+
+# General IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# ========================
+# Optional
+# ========================
+# Logs
+*.log
+
+# Backup
+*.bak
+
+# Swap
+*.swp
+*.swo

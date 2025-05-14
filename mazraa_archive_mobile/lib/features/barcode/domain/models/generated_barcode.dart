@@ -1,0 +1,45 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'generated_barcode.g.dart';
+
+@JsonSerializable()
+class GeneratedBarcode {
+  final String barcode;
+  final String documentType;
+  final DateTime generatedAt;
+  final bool isUsed;
+  final String? documentId;
+  final String? storageLocation;
+
+  GeneratedBarcode({
+    required this.barcode,
+    required this.documentType,
+    required this.generatedAt,
+    this.isUsed = false,
+    this.documentId,
+    this.storageLocation,
+  });
+
+  factory GeneratedBarcode.fromJson(Map<String, dynamic> json) =>
+      _$GeneratedBarcodeFromJson(json);
+
+  Map<String, dynamic> toJson() => _$GeneratedBarcodeToJson(this);
+
+  GeneratedBarcode copyWith({
+    String? barcode,
+    String? documentType,
+    DateTime? generatedAt,
+    bool? isUsed,
+    String? documentId,
+    String? storageLocation,
+  }) {
+    return GeneratedBarcode(
+      barcode: barcode ?? this.barcode,
+      documentType: documentType ?? this.documentType,
+      generatedAt: generatedAt ?? this.generatedAt,
+      isUsed: isUsed ?? this.isUsed,
+      documentId: documentId ?? this.documentId,
+      storageLocation: storageLocation ?? this.storageLocation,
+    );
+  }
+} 

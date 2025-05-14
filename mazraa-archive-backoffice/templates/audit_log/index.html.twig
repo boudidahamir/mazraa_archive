@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique des actions{% endblock %}
+
+{% block body %}
+    <h1>Historique des actions</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Action</th>
+                <th>Entité</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+                <tr>
+                    <td>{{ log.username }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ log.entityType }} ({{ log.entityId }})</td>
+                    <td>{{ log.timestamp|date('Y-m-d H:i') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

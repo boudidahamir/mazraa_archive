@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord - Mazraa Archive{% endblock %}
+
+{% block body %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-4">Tableau de bord</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Documents Statistics -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Documents</h6>
+                            <h2 class="mb-0">{{ totalDocuments }}</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-file-alt fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Storage Locations Statistics -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Emplacements</h6>
+                            <h2 class="mb-0">{{ totalStorageLocations }}</h2>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-warehouse fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Used Storage Locations -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Emplacements utilisés</h6>
+                            <h2 class="mb-0">{{ usedStorageLocations }}</h2>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-box fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Storage Locations -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Emplacements disponibles</h6>
+                            <h2 class="mb-0">{{ availableStorageLocations }}</h2>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-box-open fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents by Type -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Documents par type</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="documentsByTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Storage Location Usage -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Utilisation des emplacements</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="storageUsageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Documents by Type Chart
+        const documentsByTypeCtx = document.getElementById('documentsByTypeChart').getContext('2d');
+        new Chart(documentsByTypeCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ documentsByType|keys|json_encode|raw }},
+                datasets: [{
+                    data: {{ documentsByType|values|json_encode|raw }},
+                    backgroundColor: [
+                        '#4e73df',
+                        '#1cc88a',
+                        '#36b9cc',
+                        '#f6c23e'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Storage Usage Chart
+        const storageUsageCtx = document.getElementById('storageUsageChart').getContext('2d');
+        new Chart(storageUsageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Utilisés', 'Disponibles'],
+                datasets: [{
+                    data: [{{ usedStorageLocations }}, {{ availableStorageLocations }}],
+                    backgroundColor: [
+                        '#f6c23e',
+                        '#1cc88a'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %} 

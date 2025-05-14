@@ -1,0 +1,9 @@
+parameters:
+    api_base_url: '%env(API_BASE_URL)%'
+    api_timeout: 30
+
+services:
+    App\Service\ApiService:
+        arguments:
+            $baseUrl: '%api_base_url%'
+            $timeout: '%api_timeout%' 
