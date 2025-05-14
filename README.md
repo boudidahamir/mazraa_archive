@@ -30,25 +30,20 @@ composer install
 
 3. Configure the database in `.env`:
 ```env
-DATABASE_URL="sqlsrv://server=localhost;database=mazraa_archive;user=sa;password=your_password"
+DATABASE_URL="sqlsrv://server=localhost;database=YOUR_DATABSE;user=USERADMIN;password=YOUR_PASSWORD"
+APP_SECRET=yoursecret
+API_BASE_URL=http://localhost:8081
+APP_ENV=dev
+APP_DEBUG=1
 ```
 
-4. Create the database:
-```bash
-php bin/console doctrine:database:create
-```
 
-5. Run migrations:
-```bash
-php bin/console doctrine:migrations:migrate
-```
-
-6. Create an admin user:
+4. Create an admin user:
 ```bash
 php bin/console app:create-admin admin@mazraa.com password
 ```
 
-7. Start the development server:
+5. Start the development server:
 ```bash
 symfony server:start
 ```
