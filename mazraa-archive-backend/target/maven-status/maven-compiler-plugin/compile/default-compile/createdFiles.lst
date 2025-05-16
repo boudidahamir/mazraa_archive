@@ -10,7 +10,6 @@ com\mazraa\archive\aspect\AuditLogAspect.class
 com\mazraa\archive\dto\AuditLogDTO.class
 com\mazraa\archive\model\DocumentType.class
 com\mazraa\archive\security\JwtAuthenticationFilter.class
-com\mazraa\archive\security\CustomUserDetailsService.class
 com\mazraa\archive\ArchiveManagementApplication.class
 com\mazraa\archive\dto\LoginRequest.class
 com\mazraa\archive\service\DocumentService.class
@@ -28,6 +27,7 @@ com\mazraa\archive\dto\DocumentTypeCreateRequest.class
 com\mazraa\archive\dto\DocumentTypeUpdateRequest.class
 com\mazraa\archive\service\SyncService.class
 com\mazraa\archive\service\UserService.class
+com\mazraa\archive\security\UserDetailsImpl.class
 com\mazraa\archive\service\impl\SyncServiceImpl.class
 com\mazraa\archive\service\impl\DocumentServiceImpl.class
 com\mazraa\archive\service\impl\AuditLogServiceImpl.class
@@ -36,6 +36,7 @@ com\mazraa\archive\exception\GlobalExceptionHandler.class
 com\mazraa\archive\exception\ResourceNotFoundException.class
 com\mazraa\archive\model\User$UserRole.class
 com\mazraa\archive\dto\AuthResponse.class
+com\mazraa\archive\security\UserDetailsServiceImpl.class
 com\mazraa\archive\dto\UserCreateRequest.class
 com\mazraa\archive\dto\DocumentUpdateRequest.class
 com\mazraa\archive\controller\AuditLogController.class
@@ -48,7 +49,6 @@ com\mazraa\archive\dto\UserDTO.class
 com\mazraa\archive\config\SecurityConfig.class
 com\mazraa\archive\controller\BarcodeController.class
 com\mazraa\archive\controller\AuthController.class
-com\mazraa\archive\security\CustomUserDetails.class
 com\mazraa\archive\annotation\AuditLog.class
 com\mazraa\archive\repository\UserRepository.class
 com\mazraa\archive\service\BarcodeService.class

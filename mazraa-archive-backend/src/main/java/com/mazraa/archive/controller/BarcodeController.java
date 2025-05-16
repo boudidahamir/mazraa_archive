@@ -21,7 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/api/barcodes")
+@RequestMapping("/barcodes")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 @Tag(name = "Barcode Management", description = "APIs for managing document barcodes")

@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Document;
-use App\Form\DocumentType;
+use App\Model\Document;
+use App\Form\DocumentTypeType;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -58,24 +58,50 @@ class DocumentController extends AbstractController
     public function new(Request $request): Response
     {
         $document = new Document();
-        $form = $this->createForm(DocumentType::class, $document);
+
+        try {
+            $typeData = $this->apiService->get('/api/document-types/search', ['searchTerm' => '']);
+            $choices = [];
+            foreach ($typeData['content'] ?? [] as $type) {
+                $choices[$type['name']] = $type['id']; // ['Facture' => 1]
+            }
+        } catch (\Exception $e) {
+            $choices = [];
+            $this->addFlash('error', 'Impossible de charger les types de documents.');
+        }
+
+        $form = $this->createForm(DocumentTypeType::class, $document, [
+            'document_type_choices' => $choices,
+        ]);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            try {
-                $this->apiService->post('/api/documents', $document->toApiRequest());
-                $this->addFlash('success', 'Le document a été créé avec succès.');
-                return $this->redirectToRoute('app_documents_index');
-            } catch (\Exception $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de la création du document.');
+            $uploadedFile = $form['file']->getData();
+
+            if ($uploadedFile) {
+                try {
+                    $apiPayload = $document->toApiRequest();
+                    $json = json_encode($apiPayload);
+
+                    $this->apiService->uploadFileWithJson('/api/documents', $json, $uploadedFile->openFile());
+
+                    $this->addFlash('success', 'Le document a été créé avec succès.');
+                    return $this->redirectToRoute('app_documents_index');
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Erreur lors de la création du document : ' . $e->getMessage());
+                }
+            } else {
+                $this->addFlash('error', 'Veuillez ajouter un fichier.');
             }
         }
 
         return $this->render('document/form.html.twig', [
-            'document' => $document,
             'form' => $form->createView(),
+            'document' => $document,
         ]);
     }
+
 
     #[Route('/{id}', name: 'app_documents_show', methods: ['GET'])]
     public function show(int $id): Response
@@ -97,8 +123,8 @@ class DocumentController extends AbstractController
         try {
             $documentData = $this->apiService->get('/api/documents/' . $id);
             $document = Document::fromApiResponse($documentData);
-            
-            $form = $this->createForm(DocumentType::class, $document);
+
+            $form = $this->createForm(DocumentTypeType::class, $document);
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
@@ -135,7 +161,7 @@ class DocumentController extends AbstractController
     #[Route('/{id}/archive', name: 'app_documents_archive', methods: ['POST'])]
     public function archive(Request $request, int $id): Response
     {
-        if ($this->isCsrfTokenValid('archive'.$id, $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('archive' . $id, $request->request->get('_token'))) {
             try {
                 $documentData = $this->apiService->getDocument($id);
                 $document = Document::fromApiResponse($documentData);
@@ -153,7 +179,7 @@ class DocumentController extends AbstractController
     #[Route('/{id}/retrieve', name: 'app_documents_retrieve', methods: ['POST'])]
     public function retrieve(Request $request, int $id): Response
     {
-        if ($this->isCsrfTokenValid('retrieve'.$id, $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('retrieve' . $id, $request->request->get('_token'))) {
             try {
                 $documentData = $this->apiService->getDocument($id);
                 $document = Document::fromApiResponse($documentData);
@@ -171,7 +197,7 @@ class DocumentController extends AbstractController
     #[Route('/{id}/destroy', name: 'app_documents_destroy', methods: ['POST'])]
     public function destroy(Request $request, int $id): Response
     {
-        if ($this->isCsrfTokenValid('destroy'.$id, $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('destroy' . $id, $request->request->get('_token'))) {
             try {
                 $documentData = $this->apiService->getDocument($id);
                 $document = Document::fromApiResponse($documentData);
@@ -185,4 +211,4 @@ class DocumentController extends AbstractController
 
         return $this->redirectToRoute('app_documents_show', ['id' => $id]);
     }
-} 
+}

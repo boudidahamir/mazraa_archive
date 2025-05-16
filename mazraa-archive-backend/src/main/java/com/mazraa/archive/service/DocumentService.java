@@ -3,6 +3,9 @@ package com.mazraa.archive.service;
 import com.mazraa.archive.dto.DocumentCreateRequest;
 import com.mazraa.archive.dto.DocumentDTO;
 import com.mazraa.archive.dto.DocumentUpdateRequest;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,4 +23,5 @@ public interface DocumentService {
     void archiveDocument(Long id, Long userId);
     void deleteDocument(Long id);
     byte[] downloadDocument(Long id);
+    List<DocumentDTO> getAllDocuments();
 } 

@@ -27,3 +27,7 @@ services:
     App\Service\ApiService:
         arguments:
             $timeout: 30
+    
+    App\Security\JwtAuthenticator:
+        arguments:
+            $jwtSecret: '%env(JWT_SECRET)%'

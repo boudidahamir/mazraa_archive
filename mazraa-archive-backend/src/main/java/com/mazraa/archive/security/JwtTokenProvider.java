@@ -5,11 +5,13 @@ import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -27,18 +29,44 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+        try {
+            Object principal = authentication.getPrincipal();
+    
+            String username;
+            List<String> roles;
+    
+            if (principal instanceof UserDetailsImpl userDetails) {
+                username = userDetails.getUsername();
+                roles = userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList();
+            } else if (principal instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
+                roles = userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList();
+            } else {
+                throw new IllegalStateException("Unsupported principal type: " + principal.getClass());
+            }
+    
+            Date now = new Date();
+            Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+            log.info("[JWT] Creating token for: " + username + " with roles: " + roles);
 
-        return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey())
-                .compact();
+            return Jwts.builder()
+                    .setSubject(username)
+                    .claim("roles", roles)
+                    .setIssuedAt(now)
+                    .setExpiration(expiryDate)
+                    .signWith(getSigningKey())
+                    .compact();
+    
+        } catch (Exception ex) {
+            log.error("JWT generation failed", ex);
+            throw new RuntimeException("JWT generation failed", ex);
+        }
     }
-
+    
     public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -52,9 +80,9 @@ public class JwtTokenProvider {
     public boolean validateToken(String authToken) {
         try {
             Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(authToken);
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(authToken);
             return true;
         } catch (SecurityException ex) {
             log.error("Invalid JWT signature");
@@ -69,4 +97,28 @@ public class JwtTokenProvider {
         }
         return false;
     }
-} 
+
+    public List<String> getRolesFromJWT(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    
+        Object rawRoles = claims.get("roles");
+    
+        if (rawRoles instanceof List<?> list) {
+            return list.stream()
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .toList();
+        }
+    
+        // fallback to empty list
+        log.warn("[JWT] Roles claim missing or not a list: {}", rawRoles);
+        return List.of();
+    }
+    
+    
+    
+}

@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\StorageLocation;
+use App\Model\StorageLocation;
 use App\Form\StorageLocationType;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

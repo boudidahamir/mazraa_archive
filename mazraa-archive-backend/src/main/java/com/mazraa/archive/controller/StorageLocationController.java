@@ -4,10 +4,13 @@ import com.mazraa.archive.annotation.AuditLog;
 import com.mazraa.archive.dto.StorageLocationCreateRequest;
 import com.mazraa.archive.dto.StorageLocationDTO;
 import com.mazraa.archive.dto.StorageLocationUpdateRequest;
-import com.mazraa.archive.security.CustomUserDetails;
+import com.mazraa.archive.security.UserDetailsImpl;
 import com.mazraa.archive.service.StorageLocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -16,19 +19,27 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/storage-locations")
+@RequestMapping("/storage-locations")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class StorageLocationController {
 
     private final StorageLocationService storageLocationService;
 
+    @GetMapping
+@PreAuthorize("isAuthenticated()")
+@AuditLog(action = "VIEW_ALL_STORAGE_LOCATIONS", entityType = "STORAGE_LOCATION", details = "Viewed all storage locations")
+public ResponseEntity<List<StorageLocationDTO>> getAllStorageLocations() {
+    return ResponseEntity.ok(storageLocationService.getAllStorageLocations());
+}
+
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @AuditLog(action = "CREATE_STORAGE_LOCATION", entityType = "STORAGE_LOCATION", details = "Created new storage location")
     public ResponseEntity<StorageLocationDTO> createStorageLocation(
             @Valid @RequestBody StorageLocationCreateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(storageLocationService.createStorageLocation(request, userDetails.getId()));
     }
 
@@ -38,7 +49,7 @@ public class StorageLocationController {
     public ResponseEntity<StorageLocationDTO> updateStorageLocation(
             @PathVariable Long id,
             @Valid @RequestBody StorageLocationUpdateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(storageLocationService.updateStorageLocation(id, request, userDetails.getId()));
     }
 

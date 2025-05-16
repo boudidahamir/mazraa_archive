@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity;
+namespace App\Model;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -40,7 +40,7 @@ class Document
         $document->setBarcode($data['barcode'] ?? null);
         $document->setDescription($data['description'] ?? null);
         $document->setStorageLocation($data['storageLocation'] ?? null);
-        
+
         if (isset($data['createdAt'])) {
             $document->setCreatedAt(new \DateTimeImmutable($data['createdAt']));
         }
@@ -56,21 +56,17 @@ class Document
 
     public function toApiRequest(): array
     {
-        $data = [
+        return [
             'title' => $this->title,
-            'documentType' => $this->documentType,
+            'documentTypeId' => $this->documentType,
             'status' => $this->status,
             'barcode' => $this->barcode,
             'description' => $this->description,
-            'storageLocation' => $this->storageLocation,
+            'storageLocationId' => $this->storageLocation,
         ];
-
-        if ($this->id) {
-            $data['id'] = $this->id;
-        }
-
-        return $data;
     }
+
+
 
     public function getId(): ?int
     {
@@ -184,7 +180,7 @@ class Document
 
     public function getStatusLabel(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'ACTIVE' => 'Actif',
             'ARCHIVED' => 'Archivé',
             'RETRIEVED' => 'Retiré',
@@ -195,7 +191,7 @@ class Document
 
     public function getStatusColor(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'ACTIVE' => 'success',
             'ARCHIVED' => 'info',
             'RETRIEVED' => 'warning',
@@ -203,4 +199,4 @@ class Document
             default => 'secondary'
         };
     }
-} 
+}

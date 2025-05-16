@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Entity\User;
+use App\Model\User;
 use App\Service\ApiService;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -20,17 +20,26 @@ class UserProvider implements UserProviderInterface
 
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
+        error_log("[UserProvider] Looking up user: " . $identifier);
+
         try {
             $userData = $this->apiService->getUserByUsername($identifier);
             $user = new User();
             $user->setId($userData['id']);
             $user->setUsername($userData['username']);
             $user->setEmail($userData['email']);
-            $user->setRoles($userData['roles']);
-            $user->setFirstName($userData['firstName']);
-            $user->setLastName($userData['lastName']);
-            $user->setIsActive($userData['isActive']);
-            
+            $user->setPassword($userData['password']);
+            if (isset($userData['roles'])) {
+                $user->setRoles($userData['roles']);
+            } elseif (isset($userData['role'])) {
+                $role = strtoupper($userData['role']);
+                $user->setRoles(['ROLE_' . $role]);
+            }
+            $user->setFirstName($userData['firstName'] ?? ''); // fallback
+            $user->setLastName($userData['lastName'] ?? $userData['fullName'] ?? '');
+            $user->setIsActive($userData['enabled'] ?? true); // use "enabled" instead of "isActive"
+
+
             if (isset($userData['createdAt'])) {
                 $user->setCreatedAt(new \DateTimeImmutable($userData['createdAt']));
             }
@@ -66,4 +75,4 @@ class UserProvider implements UserProviderInterface
     {
         return $this->loadUserByIdentifier($username);
     }
-} 
+}

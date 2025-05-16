@@ -1,38 +1,26 @@
 security:
     enable_authenticator_manager: true
-    password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    
+
     providers:
         app_user_provider:
-            entity:
-                class: App\Entity\User
-                property: username
+            id: App\Security\UserProvider
 
     firewalls:
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
         main:
+            pattern: ^/
             lazy: true
             provider: app_user_provider
-            form_login:
-                login_path: app_login
-                check_path: app_login
-                enable_csrf: true
+            custom_authenticators:
+                - App\Security\JwtAuthenticator
             logout:
                 path: app_logout
                 target: app_login
-            remember_me:
-                secret: '%kernel.secret%'
-                lifetime: 604800 # 1 week in seconds
-                path: /
 
     access_control:
-        - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/documents, roles: ROLE_USER }
+        - { path: ^/dashboard, roles: ROLE_ADMIN }
+        - { path: ^/documents, roles: ROLE_ADMIN }
         - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/dashboard, roles: ROLE_USER }
+        - { path: ^/$, roles: PUBLIC_ACCESS  }
 
 when@test:
     security:

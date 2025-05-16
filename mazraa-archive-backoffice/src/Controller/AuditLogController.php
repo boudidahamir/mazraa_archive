@@ -12,7 +12,12 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/audit-logs')]
 class AuditLogController extends AbstractController
 {
-    public function __construct(private readonly ApiService $apiService) {}
+    private ApiService $apiService;
+
+    public function __construct(ApiService $apiService)
+    {
+        $this->apiService = $apiService;
+    }
 
     #[Route('/', name: 'audit_log_index', methods: ['GET'])]
     public function index(Request $request): Response

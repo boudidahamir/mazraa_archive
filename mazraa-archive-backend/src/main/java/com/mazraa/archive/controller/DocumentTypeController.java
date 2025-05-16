@@ -3,7 +3,7 @@ package com.mazraa.archive.controller;
 import com.mazraa.archive.dto.DocumentTypeCreateRequest;
 import com.mazraa.archive.dto.DocumentTypeDTO;
 import com.mazraa.archive.dto.DocumentTypeUpdateRequest;
-import com.mazraa.archive.security.CustomUserDetails;
+import com.mazraa.archive.security.UserDetailsImpl;
 import com.mazraa.archive.service.DocumentTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/document-types")
+@RequestMapping("/document-types")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class DocumentTypeController {
@@ -26,7 +26,7 @@ public class DocumentTypeController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<DocumentTypeDTO> createDocumentType(
             @Valid @RequestBody DocumentTypeCreateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(documentTypeService.createDocumentType(request, userDetails.getId()));
     }
 
@@ -35,7 +35,7 @@ public class DocumentTypeController {
     public ResponseEntity<DocumentTypeDTO> updateDocumentType(
             @PathVariable Long id,
             @Valid @RequestBody DocumentTypeUpdateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(documentTypeService.updateDocumentType(id, request, userDetails.getId()));
     }
 

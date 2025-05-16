@@ -26,7 +26,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,8 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public DocumentDTO createDocument(DocumentCreateRequest request, MultipartFile file, Long userId) {
         if (documentRepository.existsByBarcode(request.getBarcode())) {
-            throw new ResourceAlreadyExistsException("Document with barcode " + request.getBarcode() + " already exists");
+            throw new ResourceAlreadyExistsException(
+                    "Document with barcode " + request.getBarcode() + " already exists");
         }
 
         DocumentType documentType = documentTypeRepository.findById(request.getDocumentTypeId())
@@ -210,6 +213,13 @@ public class DocumentServiceImpl implements DocumentService {
         }
     }
 
+    @Override
+    public List<DocumentDTO> getAllDocuments() {
+        return documentRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     private DocumentDTO convertToDTO(Document document) {
         DocumentDTO dto = new DocumentDTO();
         dto.setId(document.getId());
@@ -239,4 +249,4 @@ public class DocumentServiceImpl implements DocumentService {
         }
         return dto;
     }
-} 
+}

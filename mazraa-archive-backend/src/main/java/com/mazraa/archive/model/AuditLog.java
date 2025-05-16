@@ -22,7 +22,7 @@ public class AuditLog {
     @Column(nullable = false)
     private String entityType;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Long entityId;
 
     @Column(columnDefinition = "TEXT")

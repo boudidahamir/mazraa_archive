@@ -4,7 +4,7 @@ import com.mazraa.archive.annotation.AuditLog;
 import com.mazraa.archive.dto.UserCreateRequest;
 import com.mazraa.archive.dto.UserDTO;
 import com.mazraa.archive.dto.UserUpdateRequest;
-import com.mazraa.archive.security.CustomUserDetails;
+import com.mazraa.archive.security.UserDetailsImpl;
 import com.mazraa.archive.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class UserController {
@@ -25,47 +25,47 @@ public class UserController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "CREATE_USER", entityType = "USER", details = "Created new user")
+    @AuditLog(action = "CREATE_USER", entityType = "users", details = "Created new user")
     public ResponseEntity<UserDTO> createUser(
             @Valid @RequestBody UserCreateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(userService.createUser(request, userDetails.getId()));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    @AuditLog(action = "UPDATE_USER", entityType = "USER", details = "Updated user information")
+    @AuditLog(action = "UPDATE_USER", entityType = "users", details = "Updated user information")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UserUpdateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(userService.updateUser(id, request, userDetails.getId()));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    @AuditLog(action = "VIEW_USER", entityType = "USER", details = "Viewed user details")
+    @AuditLog(action = "VIEW_USER", entityType = "users", details = "Viewed user details")
     public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUser(id));
     }
 
     @GetMapping("/username/{username}")
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "VIEW_USER", entityType = "USER", details = "Viewed user by username")
+    @AuditLog(action = "VIEW_USER", entityType = "users", details = "Viewed user by username")
     public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
         return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
     @GetMapping("/email/{email}")
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "VIEW_USER", entityType = "USER", details = "Viewed user by email")
+    @AuditLog(action = "VIEW_USER", entityType = "users", details = "Viewed user by email")
     public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "SEARCH_USERS", entityType = "USER", details = "Searched users")
+    @AuditLog(action = "SEARCH_USERS", entityType = "users", details = "Searched users")
     public ResponseEntity<Page<UserDTO>> searchUsers(
             @RequestParam String searchTerm,
             Pageable pageable) {
@@ -74,7 +74,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "DELETE_USER", entityType = "USER", details = "Deleted user")
+    @AuditLog(action = "DELETE_USER", entityType = "users", details = "Deleted user")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok().build();
@@ -82,7 +82,7 @@ public class UserController {
 
     @PostMapping("/{id}/change-password")
     @PreAuthorize("#id == authentication.principal.id")
-    @AuditLog(action = "CHANGE_PASSWORD", entityType = "USER", details = "Changed user password")
+    @AuditLog(action = "CHANGE_PASSWORD", entityType = "users", details = "Changed user password")
     public ResponseEntity<Void> changePassword(
             @PathVariable Long id,
             @RequestParam String currentPassword,
@@ -93,7 +93,7 @@ public class UserController {
 
     @PostMapping("/{id}/toggle-status")
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "TOGGLE_USER_STATUS", entityType = "USER", details = "Toggled user status")
+    @AuditLog(action = "TOGGLE_USER_STATUS", entityType = "users", details = "Toggled user status")
     public ResponseEntity<Void> toggleUserStatus(
             @PathVariable Long id,
             @RequestParam boolean enabled) {

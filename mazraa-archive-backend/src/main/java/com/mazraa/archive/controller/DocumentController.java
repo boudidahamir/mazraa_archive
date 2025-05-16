@@ -4,10 +4,13 @@ import com.mazraa.archive.annotation.AuditLog;
 import com.mazraa.archive.dto.DocumentCreateRequest;
 import com.mazraa.archive.dto.DocumentDTO;
 import com.mazraa.archive.dto.DocumentUpdateRequest;
-import com.mazraa.archive.security.CustomUserDetails;
+import com.mazraa.archive.security.UserDetailsImpl;
 import com.mazraa.archive.service.DocumentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -21,12 +24,19 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/documents")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class DocumentController {
 
     private final DocumentService documentService;
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @AuditLog(action = "VIEW_ALL_DOCUMENTS", entityType = "DOCUMENT", details = "Viewed all documents")
+    public ResponseEntity<List<DocumentDTO>> getAllDocuments() {
+        return ResponseEntity.ok(documentService.getAllDocuments());
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -34,7 +44,7 @@ public class DocumentController {
     public ResponseEntity<DocumentDTO> createDocument(
             @Valid @RequestBody DocumentCreateRequest request,
             @RequestParam("file") MultipartFile file,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(documentService.createDocument(request, file, userDetails.getId()));
     }
 
@@ -45,7 +55,7 @@ public class DocumentController {
             @PathVariable Long id,
             @Valid @RequestBody DocumentUpdateRequest request,
             @RequestParam(value = "file", required = false) MultipartFile file,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(documentService.updateDocument(id, request, file, userDetails.getId()));
     }
 
@@ -113,7 +123,7 @@ public class DocumentController {
     @AuditLog(action = "ARCHIVE_DOCUMENT", entityType = "DOCUMENT", details = "Archived document")
     public ResponseEntity<Void> archiveDocument(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         documentService.archiveDocument(id, userDetails.getId());
         return ResponseEntity.ok().build();
     }

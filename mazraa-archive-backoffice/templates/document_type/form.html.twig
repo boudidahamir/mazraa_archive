@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un type{% endblock %}
+
+{% block body %}
+    <h1>Nouveau type de document</h1>
+
+    {{ form_start(form) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.code) }}
+        {{ form_row(form.description) }}
+        <br>
+        <button class="btn btn-success">Créer</button>
+    {{ form_end(form) }}
+{% endblock %}

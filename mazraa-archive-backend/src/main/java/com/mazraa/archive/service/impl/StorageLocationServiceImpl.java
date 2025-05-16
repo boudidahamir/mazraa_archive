@@ -11,6 +11,10 @@ import com.mazraa.archive.repository.StorageLocationRepository;
 import com.mazraa.archive.repository.UserRepository;
 import com.mazraa.archive.service.StorageLocationService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,13 @@ public class StorageLocationServiceImpl implements StorageLocationService {
     private final StorageLocationRepository storageLocationRepository;
     private final UserRepository userRepository;
 
+    public List<StorageLocationDTO> getAllStorageLocations() {
+        return storageLocationRepository.findAll()
+                .stream()
+                .map(StorageLocationDTO::toDTO)
+                .collect(Collectors.toList());
+    }
+    
     @Override
     @Transactional
     public StorageLocationDTO createStorageLocation(StorageLocationCreateRequest request, Long userId) {

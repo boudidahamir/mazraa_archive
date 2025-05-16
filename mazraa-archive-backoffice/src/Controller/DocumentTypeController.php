@@ -3,18 +3,24 @@
 
 namespace App\Controller;
 
-use App\Form\DocumentTypeType as DocumentTypeForm;
+use App\Form\DocumentTypeType;
 use App\Model\DocumentType;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\Form\FormFactoryInterface;
 #[Route('/document-types')]
 class DocumentTypeController extends AbstractController
 {
-    public function __construct(private readonly ApiService $apiService) {}
+    private ApiService $apiService;
+    private FormFactoryInterface $formFactory;
+    public function __construct(ApiService $apiService, FormFactoryInterface $formFactory)
+    {
+        $this->apiService = $apiService;
+        $this->formFactory = $formFactory;
+    }
 
     #[Route('/', name: 'document_type_index', methods: ['GET'])]
     public function index(): Response
@@ -35,7 +41,7 @@ class DocumentTypeController extends AbstractController
     public function new(Request $request): Response
     {
         $type = new DocumentType();
-        $form = $this->createForm(DocumentTypeForm::class, $type);
+        $form = $this->formFactory->create(DocumentTypeType::class, $type);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -53,6 +59,7 @@ class DocumentTypeController extends AbstractController
         ]);
     }
 
+
     #[Route('/{id}/edit', name: 'document_type_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, int $id): Response
     {
@@ -64,7 +71,7 @@ class DocumentTypeController extends AbstractController
             return $this->redirectToRoute('document_type_index');
         }
 
-        $form = $this->createForm(DocumentTypeForm::class, $type);
+        $form = $this->createForm(DocumentTypeType::class, $type);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

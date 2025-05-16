@@ -20,7 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/sync")
+@RequestMapping("/sync")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 @Tag(name = "Synchronization", description = "APIs for managing data synchronization between mobile and server")

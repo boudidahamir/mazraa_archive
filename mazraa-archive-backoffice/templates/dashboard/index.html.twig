@@ -79,8 +79,9 @@
         </div>
     </div>
 
-    <!-- Documents by Type -->
+    <!-- Charts -->
     <div class="row">
+        <!-- Documents by Type -->
         <div class="col-md-6 mb-4">
             <div class="card h-100">
                 <div class="card-header">
@@ -116,7 +117,7 @@
             data: {
                 labels: {{ documentsByType|keys|json_encode|raw }},
                 datasets: [{
-                    data: {{ documentsByType|values|json_encode|raw }},
+                    data: {{ documentsByType|map((v, k) => v)|json_encode|raw }},
                     backgroundColor: [
                         '#4e73df',
                         '#1cc88a',
@@ -159,4 +160,4 @@
             }
         });
     </script>
-{% endblock %} 
+{% endblock %}

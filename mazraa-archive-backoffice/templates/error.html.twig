@@ -1,0 +1,11 @@
+{# templates/error.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Erreur{% endblock %}
+
+{% block body %}
+    <div class="alert alert-danger mt-4">
+        <h4>Une erreur est survenue</h4>
+        <p>{{ error|default('Erreur inconnue') }}</p>
+    </div>
+{% endblock %}

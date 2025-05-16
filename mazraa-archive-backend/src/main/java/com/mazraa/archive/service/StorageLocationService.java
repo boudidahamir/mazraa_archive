@@ -3,6 +3,9 @@ package com.mazraa.archive.service;
 import com.mazraa.archive.dto.StorageLocationCreateRequest;
 import com.mazraa.archive.dto.StorageLocationDTO;
 import com.mazraa.archive.dto.StorageLocationUpdateRequest;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,4 +18,5 @@ public interface StorageLocationService {
     Page<StorageLocationDTO> searchStorageLocations(String searchTerm, Pageable pageable);
     Page<StorageLocationDTO> getAvailableStorageLocations(Pageable pageable);
     void deleteStorageLocation(Long id);
+    List<StorageLocationDTO> getAllStorageLocations();
 } 

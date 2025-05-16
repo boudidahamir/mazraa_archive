@@ -1,5 +1,6 @@
 package com.mazraa.archive.dto;
 
+import com.mazraa.archive.model.StorageLocation;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -22,4 +23,32 @@ public class StorageLocationDTO {
     private String createdByName;
     private Long updatedById;
     private String updatedByName;
-} 
+
+    public static StorageLocationDTO toDTO(StorageLocation storageLocation) {
+        StorageLocationDTO dto = new StorageLocationDTO();
+        dto.setId(storageLocation.getId());
+        dto.setCode(storageLocation.getCode());
+        dto.setName(storageLocation.getName());
+        dto.setDescription(storageLocation.getDescription());
+        dto.setShelf(storageLocation.getShelf());
+        dto.setRow(storageLocation.getRow());
+        dto.setBox(storageLocation.getBox());
+        dto.setActive(storageLocation.isActive());
+        dto.setCapacity(storageLocation.getCapacity());
+        dto.setUsedSpace(storageLocation.getUsedSpace());
+        dto.setCreatedAt(storageLocation.getCreatedAt());
+        dto.setUpdatedAt(storageLocation.getUpdatedAt());
+
+        if (storageLocation.getCreatedBy() != null) {
+            dto.setCreatedById(storageLocation.getCreatedBy().getId());
+            dto.setCreatedByName(storageLocation.getCreatedBy().getFullName());
+        }
+
+        if (storageLocation.getUpdatedBy() != null) {
+            dto.setUpdatedById(storageLocation.getUpdatedBy().getId());
+            dto.setUpdatedByName(storageLocation.getUpdatedBy().getFullName());
+        }
+
+        return dto;
+    }
+}
