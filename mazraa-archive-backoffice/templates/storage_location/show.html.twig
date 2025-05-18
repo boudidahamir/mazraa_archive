@@ -21,36 +21,42 @@
                 <tbody>
                     <tr>
                         <th>Nom</th>
-                        <td>{{ storageLocation.name }}</td>
+                        <td>{{ storageLocation.name ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <th>Description</th>
-                        <td>{{ storageLocation.description }}</td>
+                        <td>{{ storageLocation.description ?: 'Aucune' }}</td>
                     </tr>
                     <tr>
                         <th>Chemin</th>
-                        <td>{{ storageLocation.path }}</td>
+                        <td>{{ storageLocation.path ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <th>Statut</th>
                         <td>
-                            {% if storageLocation.isActive %}
-                                <span class="badge bg-success">Actif</span>
-                            {% else %}
-                                <span class="badge bg-danger">Inactif</span>
-                            {% endif %}
+                            <span class="badge {{ storageLocation.isActive ? 'bg-success' : 'bg-danger' }}">
+                                {{ storageLocation.isActive ? 'Actif' : 'Inactif' }}
+                            </span>
                         </td>
                     </tr>
                     <tr>
                         <th>Date de création</th>
-                        <td>{{ storageLocation.createdAt ? storageLocation.createdAt|date('d/m/Y H:i') : 'N/A' }}</td>
+                        <td>
+                            {{ storageLocation.createdAt is not null
+                                ? storageLocation.createdAt|date('d/m/Y H:i')
+                                : 'Non renseignée' }}
+                        </td>
                     </tr>
                     <tr>
                         <th>Dernière modification</th>
-                        <td>{{ storageLocation.updatedAt ? storageLocation.updatedAt|date('d/m/Y H:i') : 'N/A' }}</td>
+                        <td>
+                            {{ storageLocation.updatedAt is not null
+                                ? storageLocation.updatedAt|date('d/m/Y H:i')
+                                : 'Non modifié' }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
-{% endblock %} 
+{% endblock %}

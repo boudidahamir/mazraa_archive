@@ -3,13 +3,18 @@ package com.mazraa.archive.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "audit_logs")
 @Data
+@ToString(exclude = "user")
 @NoArgsConstructor
 public class AuditLog {
     @Id
@@ -31,6 +36,7 @@ public class AuditLog {
     @Column(nullable = false)
     private String ipAddress;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

@@ -44,28 +44,24 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    @AuditLog(action = "VIEW_USER", entityType = "users", details = "Viewed user details")
     public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUser(id));
     }
 
     @GetMapping("/username/{username}")
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "VIEW_USER", entityType = "users", details = "Viewed user by username")
     public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
         return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
     @GetMapping("/email/{email}")
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "VIEW_USER", entityType = "users", details = "Viewed user by email")
     public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "SEARCH_USERS", entityType = "users", details = "Searched users")
     public ResponseEntity<Page<UserDTO>> searchUsers(
             @RequestParam String searchTerm,
             Pageable pageable) {
@@ -93,7 +89,6 @@ public class UserController {
 
     @PostMapping("/{id}/toggle-status")
     @PreAuthorize("hasRole('ADMIN')")
-    @AuditLog(action = "TOGGLE_USER_STATUS", entityType = "users", details = "Toggled user status")
     public ResponseEntity<Void> toggleUserStatus(
             @PathVariable Long id,
             @RequestParam boolean enabled) {

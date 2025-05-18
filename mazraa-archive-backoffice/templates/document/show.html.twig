@@ -21,7 +21,7 @@
                 <tbody>
                     <tr>
                         <th>Code</th>
-                        <td>{{ document.code }}</td>
+                        <td>{{ document.barcode }}</td>
                     </tr>
                     <tr>
                         <th>Titre</th>
@@ -29,7 +29,7 @@
                     </tr>
                     <tr>
                         <th>Type</th>
-                        <td>{{ document.type }}</td>
+                        <td>{{ document.documentTypeName  }}</td>
                     </tr>
                     <tr>
                         <th>Description</th>
@@ -39,24 +39,27 @@
                         <th>Statut</th>
                         <td>
                             {% if document.status == 'ACTIVE' %}
-                                <span class="badge bg-success">Actif</span>
-                            {% elseif document.status == 'ARCHIVED' %}
-                                <span class="badge bg-warning">Archivé</span>
-                            {% else %}
-                                <span class="badge bg-danger">Inactif</span>
-                            {% endif %}
+                <span class="badge bg-success">Actif</span>
+            {% elseif document.status == 'ARCHIVED' %}
+                <span class="badge bg-warning">Archivé</span>
+            {% elseif document.status == 'RETRIEVED' %}
+                <span class="badge bg-info">Retiré</span>
+            {% elseif document.status == 'DESTROYED' %}
+                <span class="badge bg-danger">Détruit</span>
+            {% else %}
+                <span class="badge bg-secondary">Inconnu</span>
+            {% endif %}
                         </td>
                     </tr>
                     <tr>
                         <th>Emplacement</th>
                         <td>
-                            {% if document.storageLocation %}
-                                <a href="{{ path('app_storage_locations_show', {'id': document.storageLocation.id}) }}">
-                                    {{ document.storageLocation.name }}
-                                </a>
-                            {% else %}
-                                <span class="text-muted">Non assigné</span>
-                            {% endif %}
+                            {% if document.storageLocationCode %}
+    {{ document.storageLocationCode }}
+{% else %}
+    <span class="text-muted">Non assigné</span>
+{% endif %}
+
                         </td>
                     </tr>
                     <tr>

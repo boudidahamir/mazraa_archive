@@ -49,7 +49,10 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->apiService->post('/users', $form->getData());
+                $user = $form->getData();
+$plainPassword = $form->get('plainPassword')->getData();
+
+$this->apiService->post('/users', $user->toArray($plainPassword));
                 $this->addFlash('success', 'User created successfully.');
                 return $this->redirectToRoute('user_index');
             } catch (\Throwable $e) {
@@ -61,42 +64,44 @@ class UserController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
     #[Route('/{id}/edit', name: 'user_edit', requirements: ['id' => '\d+'])]
     public function edit(Request $request, int $id): Response
     {
-        $user = $this->apiService->get("/users/{$id}");
-        $form = $this->createForm(UserType::class, $user);
+        $userArray = $this->apiService->get("/users/{$id}");
+        $user = \App\Model\User::fromArray($userArray); // Assumes fromArray method exists in your User model
+    
+        $form = $this->createForm(UserType::class, $user, ['is_edit' => true]);
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->apiService->put("/users/{$id}", $form->getData());
-                $this->addFlash('success', 'User updated successfully.');
+                $plainPassword = $form->get('plainPassword')->getData();
+                $this->apiService->put("/users/{$id}", $user->toArray($plainPassword));
+                $this->addFlash('success', 'Utilisateur mis à jour avec succès.');
                 return $this->redirectToRoute('user_index');
             } catch (\Throwable $e) {
-                $this->addFlash('danger', 'Error updating user: ' . $e->getMessage());
+                $this->addFlash('danger', 'Erreur lors de la mise à jour de l\'utilisateur : ' . $e->getMessage());
             }
         }
-
+    
         return $this->render('user/edit.html.twig', [
             'form' => $form->createView(),
             'user' => $user,
         ]);
     }
+    
 
     #[Route('/{id}/delete', name: 'user_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, int $id): RedirectResponse
     {
-        if ($this->isCsrfTokenValid('delete_user_' . $id, $request->request->get('_token'))) {
-            try {
-                $this->apiService->delete("/users/{$id}");
-                $this->addFlash('success', 'User deleted successfully.');
-            } catch (\Throwable $e) {
-                $this->addFlash('danger', 'Error deleting user: ' . $e->getMessage());
-            }
+        try {
+            $this->apiService->delete("/users/{$id}");
+            $this->addFlash('success', 'Utilisateur supprimé avec succès.');
+        } catch (\Throwable $e) {
+            $this->addFlash('danger', 'Erreur lors de la suppression : ' . $e->getMessage());
         }
-
+    
         return $this->redirectToRoute('user_index');
     }
+    
 }

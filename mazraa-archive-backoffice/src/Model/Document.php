@@ -34,13 +34,13 @@ class Document
     {
         $document = new self();
         $document->setId($data['id'] ?? null);
-        $document->setTitle($data['title'] ?? null);
-        $document->setDocumentType($data['documentType'] ?? null);
+        $document->setTitle($data['title'] ?? '');
+        $document->setDocumentType($data['documentTypeName'] ?? 'Inconnu'); // <-- Correction ici
         $document->setStatus($data['status'] ?? 'ACTIVE');
-        $document->setBarcode($data['barcode'] ?? null);
-        $document->setDescription($data['description'] ?? null);
-        $document->setStorageLocation($data['storageLocation'] ?? null);
-
+        $document->setBarcode($data['barcode'] ?? '');
+        $document->setDescription($data['description'] ?? '');
+        $document->setStorageLocation($data['storageLocationCode'] ?? ''); // idem ici si tu veux afficher le nom
+    
         if (isset($data['createdAt'])) {
             $document->setCreatedAt(new \DateTimeImmutable($data['createdAt']));
         }
@@ -50,9 +50,10 @@ class Document
         if (isset($data['archivedAt'])) {
             $document->setArchivedAt(new \DateTimeImmutable($data['archivedAt']));
         }
-
+    
         return $document;
     }
+    
 
     public function toApiRequest(): array
     {

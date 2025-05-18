@@ -25,7 +25,7 @@ class AuditLogController extends AbstractController
         $page = $request->query->get('page', 0);
 
         try {
-            $logs = $this->apiService->get("/api/audit-logs", ['page' => $page]);
+            $logs = $this->apiService->get("/audit-logs", ['page' => $page]);
         } catch (\Exception $e) {
             $this->addFlash('error', 'Erreur lors du chargement de l\'historique.');
             $logs = ['content' => [], 'totalPages' => 1];

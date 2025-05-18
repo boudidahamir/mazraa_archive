@@ -35,9 +35,8 @@ class UserProvider implements UserProviderInterface
                 $role = strtoupper($userData['role']);
                 $user->setRoles(['ROLE_' . $role]);
             }
-            $user->setFirstName($userData['firstName'] ?? ''); // fallback
-            $user->setLastName($userData['lastName'] ?? $userData['fullName'] ?? '');
-            $user->setIsActive($userData['enabled'] ?? true); // use "enabled" instead of "isActive"
+            $user->setFullName($userData['fullname'] ?? ''); // fallback
+            $user->setenabled($userData['enabled'] ?? true); // use "enabled" instead of "isActive"
 
 
             if (isset($userData['createdAt'])) {
@@ -47,7 +46,7 @@ class UserProvider implements UserProviderInterface
                 $user->setLastLoginAt(new \DateTimeImmutable($userData['lastLoginAt']));
             }
 
-            if (!$user->isActive()) {
+            if (!$user->enabled()) {
                 throw new UserNotFoundException('User account is disabled.');
             }
 

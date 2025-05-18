@@ -4,6 +4,12 @@
 
 {% block body %}
     <h1>Nouveau type de document</h1>
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger">{{ message }}</div>
+{% endfor %}
 
     {{ form_start(form) }}
         {{ form_row(form.name) }}

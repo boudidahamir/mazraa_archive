@@ -14,10 +14,8 @@ public class DocumentDTO {
     private String documentTypeName;
     private Long storageLocationId;
     private String storageLocationCode;
-    private String filePath;
-    private String fileType;
-    private Long fileSize;
     private Long createdById;
+    private String status;
     private String createdByName;
     private Long updatedById;
     private String updatedByName;
@@ -27,4 +25,4 @@ public class DocumentDTO {
     private LocalDateTime archivedAt;
     private Long archivedById;
     private String archivedByName;
-} 
+}

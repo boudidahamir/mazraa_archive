@@ -14,15 +14,31 @@
         <div class="card-body">
             {{ form_start(form) }}
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         {{ form_row(form.name) }}
                     </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.path) }}
+                    <div class="col-md-4">
+                        {{ form_row(form.code) }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_row(form.capacity) }}
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        {{ form_row(form.shelf) }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_row(form.row) }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_row(form.box) }}
+                    </div>
+                </div>
+
                 {{ form_row(form.description) }}
-                {{ form_row(form.isActive) }}
+                {{ form_row(form.active) }}
 
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary">
@@ -32,4 +48,4 @@
             {{ form_end(form) }}
         </div>
     </div>
-{% endblock %} 
+{% endblock %}

@@ -28,7 +28,6 @@ public class StorageLocationController {
 
     @GetMapping
 @PreAuthorize("isAuthenticated()")
-@AuditLog(action = "VIEW_ALL_STORAGE_LOCATIONS", entityType = "STORAGE_LOCATION", details = "Viewed all storage locations")
 public ResponseEntity<List<StorageLocationDTO>> getAllStorageLocations() {
     return ResponseEntity.ok(storageLocationService.getAllStorageLocations());
 }
@@ -55,21 +54,18 @@ public ResponseEntity<List<StorageLocationDTO>> getAllStorageLocations() {
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    @AuditLog(action = "VIEW_STORAGE_LOCATION", entityType = "STORAGE_LOCATION", details = "Viewed storage location details")
     public ResponseEntity<StorageLocationDTO> getStorageLocation(@PathVariable Long id) {
         return ResponseEntity.ok(storageLocationService.getStorageLocation(id));
     }
 
     @GetMapping("/code/{code}")
     @PreAuthorize("isAuthenticated()")
-    @AuditLog(action = "VIEW_STORAGE_LOCATION", entityType = "STORAGE_LOCATION", details = "Viewed storage location by code")
     public ResponseEntity<StorageLocationDTO> getStorageLocationByCode(@PathVariable String code) {
         return ResponseEntity.ok(storageLocationService.getStorageLocationByCode(code));
     }
 
     @GetMapping("/location")
     @PreAuthorize("isAuthenticated()")
-    @AuditLog(action = "VIEW_STORAGE_LOCATION", entityType = "STORAGE_LOCATION", details = "Viewed storage location by physical location")
     public ResponseEntity<StorageLocationDTO> getStorageLocationByLocation(
             @RequestParam String shelf,
             @RequestParam String row,
@@ -79,7 +75,6 @@ public ResponseEntity<List<StorageLocationDTO>> getAllStorageLocations() {
 
     @GetMapping("/search")
     @PreAuthorize("isAuthenticated()")
-    @AuditLog(action = "SEARCH_STORAGE_LOCATIONS", entityType = "STORAGE_LOCATION", details = "Searched storage locations")
     public ResponseEntity<Page<StorageLocationDTO>> searchStorageLocations(
             @RequestParam String searchTerm,
             Pageable pageable) {
@@ -88,7 +83,6 @@ public ResponseEntity<List<StorageLocationDTO>> getAllStorageLocations() {
 
     @GetMapping("/available")
     @PreAuthorize("isAuthenticated()")
-    @AuditLog(action = "VIEW_AVAILABLE_STORAGE_LOCATIONS", entityType = "STORAGE_LOCATION", details = "Viewed available storage locations")
     public ResponseEntity<Page<StorageLocationDTO>> getAvailableStorageLocations(Pageable pageable) {
         return ResponseEntity.ok(storageLocationService.getAvailableStorageLocations(pageable));
     }

@@ -104,7 +104,6 @@ public class BarcodeController {
     })
     @GetMapping("/extract-id/{barcode}")
     @PreAuthorize("isAuthenticated()")
-    @AuditLog(action = "EXTRACT_ID", entityType = "DOCUMENT", details = "Extracted ID from barcode: {barcode}")
     public ResponseEntity<String> extractIdFromBarcode(
             @Parameter(description = "Barcode to extract ID from") 
             @PathVariable String barcode) {
@@ -125,7 +124,6 @@ public class BarcodeController {
     })
     @PostMapping("/{barcode}/location/{locationId}")
     @PreAuthorize("isAuthenticated()")
-    @AuditLog(action = "ASSOCIATE_LOCATION", entityType = "DOCUMENT", details = "Associated barcode {barcode} with location {locationId}")
     public ResponseEntity<Void> associateBarcodeWithLocation(
             @Parameter(description = "Barcode to associate") 
             @PathVariable String barcode,
@@ -145,7 +143,6 @@ public class BarcodeController {
     })
     @GetMapping("/{barcode}/location")
     @PreAuthorize("isAuthenticated()")
-    @AuditLog(action = "GET_LOCATION", entityType = "DOCUMENT", details = "Retrieved location for barcode: {barcode}")
     public ResponseEntity<Long> getLocationForBarcode(
             @Parameter(description = "Barcode to get location for") 
             @PathVariable String barcode) {

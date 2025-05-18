@@ -11,10 +11,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $username = null;
     private ?string $email = null;
     private ?string $password = null;
+    private ?string $role = null;
     private ?array $roles = [];
-    private ?string $firstName = null;
-    private ?string $lastName = null;
-    private ?bool $isActive = true;
+    private ?string $fullName = null;
+    private ?bool $enabled = true;
     private ?\DateTimeImmutable $createdAt = null;
     private ?\DateTimeImmutable $lastLoginAt = null;
 
@@ -50,18 +50,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->username;
     }
 
-    public function getRoles(): array
+    public function getRole(): ?string
     {
-        $roles = $this->roles;
-        return array_unique($roles);
+        return $this->role;
     }
+
+    public function setRole(string $role): self
+    {
+        $this->role = $role;
+        return $this;
+    }
+
+    public function getRoles(): array
+{
+    return $this->roles ?? ['ROLE_USER'];
+}
+
+
 
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
         return $this;
     }
-
     public function getPassword(): string
     {
         return $this->password ?? '';
@@ -90,36 +101,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getFirstName(): ?string
+    
+
+
+    public function enabled(): ?bool
     {
-        return $this->firstName;
+        return $this->enabled;
     }
 
-    public function setFirstName(string $firstName): self
+    public function setenabled(bool $enabled): self
     {
-        $this->firstName = $firstName;
-        return $this;
-    }
-
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): self
-    {
-        $this->lastName = $lastName;
-        return $this;
-    }
-
-    public function isActive(): ?bool
-    {
-        return $this->isActive;
-    }
-
-    public function setIsActive(bool $isActive): self
-    {
-        $this->isActive = $isActive;
+        $this->enabled = $enabled;
         return $this;
     }
 
@@ -147,6 +139,45 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->createdAt = $createdAt;
         return $this;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->fullName;
+    }
+
+    public function setFullName(string $fullName): self
+    {
+        $this->fullName = $fullName;
+        return $this;
+    }
+
+    public function toArray(string $plainPassword = null): array
+    {
+        return [
+            'username' => $this->getUsername(),
+            'email' => $this->getEmail(),
+            'fullName' => $this->getFullName(),
+            'password' => $plainPassword, // récupéré depuis le formulaire
+            'role' => $this->getRole(), // supposons un seul rôle
+            'roles' => $this->getRoles(),
+            'enabled' => $this->enabled(),
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        $user = new self();
+
+        $user->setId($data['id'] ?? null);
+        $user->setUsername($data['username'] ?? '');
+        $user->setEmail($data['email'] ?? '');
+        $user->setFullName($data['fullName'] ?? '');
+        $user->setRole($data['role'] ?? '');
+        $user->setRoles([$data['role'] ?? '']); // pour hydrater le champ Symfony (ChoiceType multiple)
+        $user->setenabled($data['enabled'] ?? false);
+
+        return $user;
     }
 
 }

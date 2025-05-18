@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Model\Document;
-use App\Form\DocumentTypeType;
+use App\Form\DocumentFormType;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,24 +26,37 @@ class DocumentController extends AbstractController
         $search = $request->query->get('search');
         $type = $request->query->get('type');
         $status = $request->query->get('status');
-
-        $query = array_filter([
-            'search' => $search,
-            'type' => $type,
-            'status' => $status,
-        ]);
-
+    
+        $documents = [];
+    
         try {
-            $documents = $this->apiService->get('/api/documents', $query);
-            $documentTypes = $this->apiService->get('/api/document-types');
-            $documentStatuses = $this->apiService->get('/api/document-statuses');
+            if ($search) {
+                // Search endpoint
+                $result = $this->apiService->get('/documents/search', ['searchTerm' => $search]);
+                $documents = $result['content'] ?? $result;
+            } elseif ($type) {
+                // Filter by document type ID
+                $result = $this->apiService->get('/documents/type/' . $type);
+                $documents = $result['content'] ?? $result;
+            } else {
+                // Default: get all documents
+                $documents = $this->apiService->get('/documents');
+            }
+    
+            // Optional status filtering (client-side)
+            if ($status) {
+                $documents = array_filter($documents, fn($doc) => $doc['status'] === $status);
+            }
+    
+            $documentTypes = $this->apiService->get('/document-types');
+            $documentStatuses = ['ACTIVE', 'ARCHIVED', 'RETRIEVED', 'DESTROYED'];
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Une erreur est survenue lors de la récupération des documents.');
+            $this->addFlash('error', 'Erreur lors de la récupération des documents : ' . $e->getMessage());
             $documents = [];
             $documentTypes = [];
             $documentStatuses = [];
         }
-
+    
         return $this->render('document/index.html.twig', [
             'documents' => $documents,
             'documentTypes' => $documentTypes,
@@ -53,61 +66,65 @@ class DocumentController extends AbstractController
             'selectedStatus' => $status,
         ]);
     }
-
+    
     #[Route('/new', name: 'app_documents_new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
         $document = new Document();
-
+    
         try {
-            $typeData = $this->apiService->get('/api/document-types/search', ['searchTerm' => '']);
-            $choices = [];
+            // Fetch document types and storage locations from API
+            $typeData = $this->apiService->get('/document-types/search', ['searchTerm' => '']);
+            $storageData = $this->apiService->get('/storage-locations');
+    
+            // Format choices for Symfony form
+            $docTypeChoices = [];
             foreach ($typeData['content'] ?? [] as $type) {
-                $choices[$type['name']] = $type['id']; // ['Facture' => 1]
+                $docTypeChoices[$type['name']] = $type['id'];
             }
+    
+            $storageChoices = [];
+            foreach ($storageData ?? [] as $loc) {
+                $storageChoices[$loc['name']] = $loc['id'];
+            }
+    
         } catch (\Exception $e) {
-            $choices = [];
-            $this->addFlash('error', 'Impossible de charger les types de documents.');
+            $this->addFlash('error', 'Erreur lors du chargement des types ou emplacements : ' . $e->getMessage());
+            $docTypeChoices = [];
+            $storageChoices = [];
         }
-
-        $form = $this->createForm(DocumentTypeType::class, $document, [
-            'document_type_choices' => $choices,
+    
+        // Create and handle the form
+        $form = $this->createForm(DocumentFormType::class, $document, [
+            'document_type_choices' => $docTypeChoices,
+            'storage_location_choices' => $storageChoices,
         ]);
-
+    
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
-            $uploadedFile = $form['file']->getData();
-
-            if ($uploadedFile) {
-                try {
-                    $apiPayload = $document->toApiRequest();
-                    $json = json_encode($apiPayload);
-
-                    $this->apiService->uploadFileWithJson('/api/documents', $json, $uploadedFile->openFile());
-
-                    $this->addFlash('success', 'Le document a été créé avec succès.');
-                    return $this->redirectToRoute('app_documents_index');
-                } catch (\Exception $e) {
-                    $this->addFlash('error', 'Erreur lors de la création du document : ' . $e->getMessage());
-                }
-            } else {
-                $this->addFlash('error', 'Veuillez ajouter un fichier.');
+            try {
+                $this->apiService->post('/documents', $document->toApiRequest());
+                $this->addFlash('success', 'Le document a été créé avec succès.');
+                return $this->redirectToRoute('app_documents_index');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Erreur lors de la création du document : ' . $e->getMessage());
             }
         }
-
+    
         return $this->render('document/form.html.twig', [
             'form' => $form->createView(),
             'document' => $document,
         ]);
     }
+    
 
 
     #[Route('/{id}', name: 'app_documents_show', methods: ['GET'])]
     public function show(int $id): Response
     {
         try {
-            $document = $this->apiService->get('/api/documents/' . $id);
+            $document = $this->apiService->get('/documents/' . $id);
             return $this->render('document/show.html.twig', [
                 'document' => $document,
             ]);
@@ -121,34 +138,55 @@ class DocumentController extends AbstractController
     public function edit(Request $request, int $id): Response
     {
         try {
-            $documentData = $this->apiService->get('/api/documents/' . $id);
+            $documentData = $this->apiService->get('/documents/' . $id);
             $document = Document::fromApiResponse($documentData);
-
-            $form = $this->createForm(DocumentTypeType::class, $document);
+    
+            // Fetch dropdown data
+            $typeData = $this->apiService->get('/document-types/search', ['searchTerm' => '']);
+            $locationData = $this->apiService->get('/storage-locations');
+    
+            // Build choice arrays
+            $docTypeChoices = [];
+            foreach ($typeData['content'] ?? [] as $type) {
+                $docTypeChoices[$type['name']] = $type['id'];
+            }
+    
+            $storageChoices = [];
+            foreach ($locationData ?? [] as $loc) {
+                $storageChoices[$loc['name']] = $loc['id'];
+            }
+    
+            // Create and handle form
+            $form = $this->createForm(DocumentFormType::class, $document, [
+                'document_type_choices' => $docTypeChoices,
+                'storage_location_choices' => $storageChoices,
+            ]);
+    
             $form->handleRequest($request);
-
+    
             if ($form->isSubmitted() && $form->isValid()) {
-                $this->apiService->put('/api/documents/' . $id, $document->toApiRequest());
+                $this->apiService->put('/documents/' . $id, $document->toApiRequest());
                 $this->addFlash('success', 'Le document a été mis à jour avec succès.');
                 return $this->redirectToRoute('app_documents_index');
             }
-
+    
             return $this->render('document/form.html.twig', [
                 'document' => $document,
                 'form' => $form->createView(),
             ]);
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Le document n\'a pas été trouvé.');
+            $this->addFlash('error', 'Le document n\'a pas été trouvé : ' . $e->getMessage());
             return $this->redirectToRoute('app_documents_index');
         }
     }
+    
 
     #[Route('/{id}', name: 'app_documents_delete', methods: ['POST'])]
     public function delete(Request $request, int $id): Response
     {
         if ($this->isCsrfTokenValid('delete' . $id, $request->request->get('_token'))) {
             try {
-                $this->apiService->delete('/api/documents/' . $id);
+                $this->apiService->delete('/documents/' . $id);
                 $this->addFlash('success', 'Le document a été supprimé avec succès.');
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Une erreur est survenue lors de la suppression du document.');

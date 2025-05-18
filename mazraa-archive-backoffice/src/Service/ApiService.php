@@ -81,15 +81,14 @@ class ApiService
         return $response->toArray();
     }
 
-    public function delete(string $endpoint): array
-    {
-        $response = $this->httpClient->request('DELETE', $this->baseUrl . $endpoint, [
-            'timeout' => $this->timeout,
-            'headers' => $this->getAuthHeaders(),
-        ]);
+    public function delete(string $endpoint): void
+{
+    $this->httpClient->request('DELETE', $this->baseUrl . $endpoint, [
+        'headers' => $this->getAuthHeaders(),
+        'timeout' => $this->timeout,
+    ]);
+}
 
-        return $response->toArray();
-    }
 
     public function getDocument(int $id): array
     {
@@ -107,27 +106,6 @@ class ApiService
         return $this->put('/documents/' . $id, $data);
     }
 
-    public function uploadFileWithJson(string $endpoint, string $jsonData, \SplFileObject $file): array
-    {
-        $response = $this->httpClient->request('POST', $this->baseUrl . $endpoint, [
-            'body' => [
-                [
-                    'name' => 'file',
-                    'contents' => fopen($file->getRealPath(), 'r'),
-                    'filename' => $file->getFilename(),
-                ],
-                [
-                    'name' => 'request',
-                    'contents' => $jsonData,
-                ],
-            ],
-            'headers' => [
-                'Content-Type' => 'multipart/form-data',
-            ],
-        ]);
-
-        return $response->toArray();
-    }
 
     public function login(string $username, string $password): array
     {
@@ -150,15 +128,6 @@ class ApiService
         return $this->post('/auth/register', $data);
     }
 
-    public function createDocument(array $metadata, \SplFileObject $file): array
-    {
-        return $this->uploadFileWithJson('/documents', json_encode($metadata), $file);
-    }
-
-    public function deleteDocument(int $id): array
-    {
-        return $this->delete('/documents/' . $id);
-    }
 
     public function searchDocuments(string $term): array
     {

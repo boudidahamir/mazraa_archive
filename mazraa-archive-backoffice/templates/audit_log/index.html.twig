@@ -19,7 +19,7 @@
                     <td>{{ log.username }}</td>
                     <td>{{ log.action }}</td>
                     <td>{{ log.entityType }} ({{ log.entityId }})</td>
-                    <td>{{ log.timestamp|date('Y-m-d H:i') }}</td>
+                    <td>{{ log.createdAt|date('Y-m-d H:i') }}</td>
                 </tr>
             {% endfor %}
         </tbody>

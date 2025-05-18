@@ -30,20 +30,14 @@ class UserType extends AbstractType
                     'placeholder' => 'Entrez l\'email',
                 ],
             ])
-            ->add('firstName', TextType::class, [
-                'label' => 'Prénom',
+            ->add('fullName', TextType::class, [
+                'label' => 'Nom complet',
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Entrez le prénom',
+                    'placeholder' => 'Entrez le nom complet',
                 ],
             ])
-            ->add('lastName', TextType::class, [
-                'label' => 'Nom',
-                'attr' => [
-                    'class' => 'form-control',
-                    'placeholder' => 'Entrez le nom',
-                ],
-            ])
+            
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'Mot de passe',
                 'required' => !$options['is_edit'],
@@ -53,19 +47,18 @@ class UserType extends AbstractType
                     'placeholder' => $options['is_edit'] ? 'Laissez vide pour ne pas modifier' : 'Entrez le mot de passe',
                 ],
             ])
-            ->add('roles', ChoiceType::class, [
-                'label' => 'Rôles',
+            ->add('role', ChoiceType::class, [
+                'label' => 'Rôle',
                 'choices' => [
-                    'Utilisateur' => 'ROLE_USER',
-                    'Administrateur' => 'ROLE_ADMIN',
+                    'Utilisateur' => 'USER',
+                    'Administrateur' => 'ADMIN',
                 ],
-                'multiple' => true,
-                'expanded' => true,
-                'attr' => [
-                    'class' => 'form-check',
-                ],
+                'expanded' => true, // boutons radio
+                'multiple' => false,
+                'attr' => ['class' => 'form-check'],
             ])
-            ->add('isActive', ChoiceType::class, [
+            
+            ->add('enabled', ChoiceType::class, [
                 'label' => 'Statut',
                 'choices' => [
                     'Actif' => true,
@@ -76,6 +69,7 @@ class UserType extends AbstractType
                     'class' => 'form-check',
                 ],
             ])
+            
         ;
     }
 

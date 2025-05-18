@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -39,14 +40,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 List<GrantedAuthority> authorities = roles.stream()
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
-
-                UserDetails userDetails = new User(username, "", authorities);
+                UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, authorities);
+                        userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                System.out.println("Authenticated user: " + username + " with roles: " + authorities);
+                System.out.println("✅ Authenticated " + userDetails.getUsername() + " (userId=" + userDetails.getId() + ")");
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

@@ -1,20 +1,25 @@
 package com.mazraa.archive.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"createdBy", "updatedBy"}) // sécurité
 @Entity
 @Table(name = "document_types")
 @EntityListeners(AuditingEntityListener.class)
 public class DocumentType {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -41,4 +46,4 @@ public class DocumentType {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by_id")
     private User updatedBy;
-} 
+}

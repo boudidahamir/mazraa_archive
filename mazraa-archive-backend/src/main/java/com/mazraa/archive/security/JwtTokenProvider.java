@@ -34,17 +34,14 @@ public class JwtTokenProvider {
     
             String username;
             List<String> roles;
+            Long userId;
     
             if (principal instanceof UserDetailsImpl userDetails) {
                 username = userDetails.getUsername();
                 roles = userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toList();
-            } else if (principal instanceof UserDetails userDetails) {
-                username = userDetails.getUsername();
-                roles = userDetails.getAuthorities().stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .toList();
+                userId = userDetails.getId();
             } else {
                 throw new IllegalStateException("Unsupported principal type: " + principal.getClass());
             }
@@ -56,6 +53,7 @@ public class JwtTokenProvider {
             return Jwts.builder()
                     .setSubject(username)
                     .claim("roles", roles)
+                    .claim("userId", userId)
                     .setIssuedAt(now)
                     .setExpiration(expiryDate)
                     .signWith(getSigningKey())

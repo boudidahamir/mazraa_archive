@@ -2,6 +2,7 @@ package com.mazraa.archive.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -25,6 +26,9 @@ public class UserCreateRequest {
     private String fullName;
 
     @NotBlank(message = "Role is required")
-    @Pattern(regexp = "^(ADMIN|USER)$", message = "Role must be either ADMIN or USER")
     private String role;
+
+    @NotNull(message = "Enabled is required")
+    private Boolean enabled;
+
 } 

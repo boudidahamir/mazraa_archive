@@ -17,3 +17,4 @@ public class DocumentTypeDTO {
     private Long updatedById;
     private String updatedByName;
 } 
+

@@ -24,7 +24,7 @@ class StorageLocationController extends AbstractController
     public function index(): Response
     {
         try {
-            $locations = $this->apiService->get('/api/storage-locations');
+            $locations = $this->apiService->get('/storage-locations');
         } catch (\Exception $e) {
             $this->addFlash('error', 'Une erreur est survenue lors de la récupération des emplacements.');
             $locations = [];
@@ -44,7 +44,7 @@ class StorageLocationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->apiService->post('/api/storage-locations', $storageLocation->toApiRequest());
+                $this->apiService->post('/storage-locations', $storageLocation->toApiRequest());
                 $this->addFlash('success', 'Emplacement créé avec succès.');
                 return $this->redirectToRoute('app_storage_locations_index');
             } catch (\Exception $e) {
@@ -62,14 +62,14 @@ class StorageLocationController extends AbstractController
     public function edit(Request $request, int $id): Response
     {
         try {
-            $storageLocationData = $this->apiService->get('/api/storage-locations/' . $id);
+            $storageLocationData = $this->apiService->get('/storage-locations/' . $id);
             $storageLocation = StorageLocation::fromApiResponse($storageLocationData);
 
             $form = $this->createForm(StorageLocationType::class, $storageLocation);
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
-                $this->apiService->put('/api/storage-locations/' . $id, $storageLocation->toApiRequest());
+                $this->apiService->put('/storage-locations/' . $id, $storageLocation->toApiRequest());
                 $this->addFlash('success', 'Emplacement modifié avec succès.');
                 return $this->redirectToRoute('app_storage_locations_index');
             }
@@ -89,7 +89,7 @@ class StorageLocationController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$id, $request->request->get('_token'))) {
             try {
-                $this->apiService->delete('/api/storage-locations/' . $id);
+                $this->apiService->delete('/storage-locations/' . $id);
                 $this->addFlash('success', 'Emplacement supprimé avec succès.');
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de la suppression de l\'emplacement: ' . $e->getMessage());
@@ -103,7 +103,7 @@ class StorageLocationController extends AbstractController
     public function show(int $id): Response
     {
         try {
-            $storageLocationData = $this->apiService->get('/api/storage-locations/' . $id);
+            $storageLocationData = $this->apiService->get('/storage-locations/' . $id);
             $storageLocation = StorageLocation::fromApiResponse($storageLocationData);
 
             return $this->render('storage_location/show.html.twig', [

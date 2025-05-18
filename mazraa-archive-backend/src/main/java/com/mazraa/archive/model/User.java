@@ -1,19 +1,25 @@
 package com.mazraa.archive.model;
 
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"createdBy", "updatedBy"}) // évite récursion
 @Entity
 @Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -46,10 +52,12 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "created_by")
     private User createdBy;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "updated_by")
     private User updatedBy;
@@ -58,4 +66,11 @@ public class User {
         ADMIN,
         USER
     }
-} 
+
+    @Column(nullable = false)
+    private String roles;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive;
+
+}

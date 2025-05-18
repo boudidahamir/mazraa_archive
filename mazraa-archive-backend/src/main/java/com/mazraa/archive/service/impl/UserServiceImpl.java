@@ -40,8 +40,10 @@ public class UserServiceImpl implements UserService {
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
         user.setRole(User.UserRole.USER);
+        user.setRoles("ROLE_" + user.getRole().name());
         user.setEnabled(true);
-
+        user.setActive(true);
+        
         return convertToDTO(userRepository.save(user));
     }
 
@@ -65,9 +67,13 @@ public class UserServiceImpl implements UserService {
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
         user.setRole(User.UserRole.valueOf(request.getRole()));
-        user.setEnabled(true);
+        user.setEnabled(request.getEnabled());
+        
+        user.setRoles("ROLE_" + user.getRole().name());
+        user.setActive(request.getEnabled());
+        
         user.setCreatedBy(creator);
-
+        
         return convertToDTO(userRepository.save(user));
     }
 
@@ -88,11 +94,15 @@ public class UserServiceImpl implements UserService {
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
         user.setRole(User.UserRole.valueOf(request.getRole()));
+        user.setRoles("ROLE_" + user.getRole().name());
+        
+
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         if (request.getEnabled() != null) {
             user.setEnabled(request.getEnabled());
+            user.setActive(request.getEnabled());
         }
         user.setUpdatedBy(updater);
 

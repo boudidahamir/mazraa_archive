@@ -9,31 +9,49 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
 class StorageLocationType extends AbstractType
 {
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('code', TextType::class, [
+                'label' => 'Code',
+                'attr' => ['placeholder' => 'EX: ZONE_A1']
+            ])
             ->add('name', TextType::class, [
                 'label' => 'Nom',
-                'attr' => ['placeholder' => 'Entrez le nom de l\'emplacement']
+                'attr' => ['placeholder' => 'Nom de l\'emplacement']
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => false,
-                'attr' => ['placeholder' => 'Entrez une description']
+                'attr' => ['placeholder' => 'Description']
             ])
-            ->add('path', TextType::class, [
-                'label' => 'Chemin',
-                'attr' => ['placeholder' => 'Entrez le chemin de l\'emplacement']
+            ->add('shelf', TextType::class, [
+                'label' => 'Étagère',
+                'attr' => ['placeholder' => 'EX: A']
+            ])
+            ->add('row', TextType::class, [
+                'label' => 'Rangée',
+                'attr' => ['placeholder' => 'EX: 1']
+            ])
+            ->add('box', TextType::class, [
+                'label' => 'Boîte',
+                'attr' => ['placeholder' => 'EX: B2']
+            ])
+            ->add('capacity', IntegerType::class, [
+                'label' => 'Capacité',
+                'attr' => ['placeholder' => 'EX: 100']
             ])
             ->add('isActive', CheckboxType::class, [
                 'label' => 'Actif',
                 'required' => false
-            ])
-        ;
+            ]);
     }
+
 
     public function configureOptions(OptionsResolver $resolver): void
     {
@@ -41,4 +59,4 @@ class StorageLocationType extends AbstractType
             'data_class' => StorageLocation::class,
         ]);
     }
-} 
+}

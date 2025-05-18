@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "documents")
 public class Document {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,15 +35,6 @@ public class Document {
     @ManyToOne
     @JoinColumn(name = "storage_location_id")
     private StorageLocation storageLocation;
-
-    @Column(nullable = false)
-    private String filePath;
-
-    @Column(nullable = false)
-    private String fileType;
-
-    @Column(nullable = false)
-    private Long fileSize;
 
     @Column(nullable = false)
     private boolean archived = false;
@@ -69,28 +61,4 @@ public class Document {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
-    public User getArchivedBy() {
-        return archivedBy;
-    }
-
-    public void setArchivedBy(User archivedBy) {
-        this.archivedBy = archivedBy;
-    }
-
-    public User getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public User getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(User updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-} 
+}

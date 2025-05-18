@@ -14,9 +14,12 @@ public class DocumentCreateRequest {
 
     private String description;
 
+    @NotBlank(message = "Status is required")
+    private String status;
+
     @NotNull(message = "Document type is required")
     private Long documentTypeId;
 
     @NotNull(message = "Storage location is required")
     private Long storageLocationId;
-} 
+}

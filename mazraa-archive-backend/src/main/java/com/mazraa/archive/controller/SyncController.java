@@ -52,7 +52,6 @@ public class SyncController {
     })
     @GetMapping("/pending/{deviceId}")
     @PreAuthorize("isAuthenticated()")
-    @AuditLog(action = "VIEW_PENDING_SYNC", entityType = "SYNC", details = "Viewed pending syncs")
     public ResponseEntity<Page<SyncLog>> getPendingSyncs(
             @Parameter(description = "Device ID to get pending syncs for") 
             @PathVariable String deviceId,

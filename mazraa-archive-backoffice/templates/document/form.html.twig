@@ -1,45 +1,30 @@
+{# templates/document/form.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ document.id ? 'Modifier' : 'Nouveau' }} document{% endblock %}
+{% block title %}
+    {{ document.id ? 'Modifier le document' : 'Nouveau document' }}
+{% endblock %}
 
 {% block body %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>{{ document.id ? 'Modifier' : 'Nouveau' }} document</h1>
-        <a href="{{ path('app_documents_index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Retour à la liste
-        </a>
-    </div>
+    <h1>{{ document.id ? 'Modifier le document' : 'Nouveau document' }}</h1>
 
-    <div class="card">
-        <div class="card-body">
-            {{ form_start(form, { 'attr': {'enctype': 'multipart/form-data'} }) }}
-                <div class="row">
-                    <div class="col-md-6">
-                        {{ form_row(form.title) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.type) }}
-                    </div>
-                </div>
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
 
-                <div class="row">
-                    <div class="col-md-6">
-                        {{ form_row(form.code) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.storageLocation) }}
-                    </div>
-                </div>
-
-                {{ form_row(form.description) }}
-                {{ form_row(form.status) }}
-
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> {{ document.id ? 'Mettre à jour' : 'Créer' }}
-                    </button>
-                </div>
-            {{ form_end(form) }}
-        </div>
-    </div>
-{% endblock %} 
+    {{ form_start(form) }}
+        {{ form_row(form.title) }}
+        {{ form_row(form.documentType) }}
+        {{ form_row(form.barcode) }}
+        {{ form_row(form.storageLocation) }}
+        {{ form_row(form.status) }}
+        {{ form_row(form.description) }}
+        <br>
+        <button class="btn btn-success">
+            {{ document.id ? 'Mettre à jour' : 'Créer' }}
+        </button>
+    {{ form_end(form) }}
+{% endblock %}

@@ -26,7 +26,7 @@ class DocumentTypeController extends AbstractController
     public function index(): Response
     {
         try {
-            $types = $this->apiService->get('/api/document-types/search', ['searchTerm' => '']);
+            $types = $this->apiService->get('/document-types/search', ['searchTerm' => '']);
         } catch (\Exception $e) {
             $this->addFlash('error', 'Erreur lors de la récupération des types de documents.');
             $types = ['content' => []];
@@ -46,7 +46,7 @@ class DocumentTypeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->apiService->post('/api/document-types', $type->toApiRequest());
+                $this->apiService->post('/document-types', $type->toApiRequest());
                 $this->addFlash('success', 'Type de document ajouté avec succès.');
                 return $this->redirectToRoute('document_type_index');
             } catch (\Exception $e) {
@@ -64,7 +64,7 @@ class DocumentTypeController extends AbstractController
     public function edit(Request $request, int $id): Response
     {
         try {
-            $data = $this->apiService->get("/api/document-types/$id");
+            $data = $this->apiService->get("/document-types/$id");
             $type = DocumentType::fromApiResponse($data);
         } catch (\Exception $e) {
             $this->addFlash('error', 'Type introuvable.');
@@ -76,7 +76,7 @@ class DocumentTypeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->apiService->put("/api/document-types/$id", $type->toApiRequest());
+                $this->apiService->put("/document-types/$id", $type->toApiRequest());
                 $this->addFlash('success', 'Type mis à jour avec succès.');
                 return $this->redirectToRoute('document_type_index');
             } catch (\Exception $e) {
@@ -94,7 +94,7 @@ class DocumentTypeController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete' . $id, $request->request->get('_token'))) {
             try {
-                $this->apiService->delete("/api/document-types/$id");
+                $this->apiService->delete("/document-types/$id");
                 $this->addFlash('success', 'Type supprimé avec succès.');
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de la suppression.');

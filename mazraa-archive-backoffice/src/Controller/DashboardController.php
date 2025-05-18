@@ -24,25 +24,31 @@ class DashboardController extends BaseController
             // Group documents by type
             $documentsByType = [];
             foreach ($documents as $document) {
-                $type = $document['documentType'];
-                if (!isset($documentsByType[$type])) {
-                    $documentsByType[$type] = 0;
-                }
-                $documentsByType[$type]++;
+                $type = $document['documentTypeName'] ?? 'Inconnu';
+                $documentsByType[$type] = ($documentsByType[$type] ?? 0) + 1;
             }
-
+            $chartLabels = array_keys($documentsByType);
+            $chartData = array_values($documentsByType);
             return $this->renderWithApiData('dashboard/index.html.twig', [
                 'totalDocuments' => $totalDocuments,
                 'totalStorageLocations' => $totalStorageLocations,
                 'usedStorageLocations' => $usedStorageLocations,
                 'availableStorageLocations' => $availableStorageLocations,
                 'documentsByType' => $documentsByType,
+                'chartLabels' => $chartLabels,
+                'chartData' => $chartData,
             ]);
         } catch (\Exception $e) {
             $this->addFlash('error', 'Erreur lors du chargement du tableau de bord: ' . $e->getMessage());
             return $this->renderWithApiData('dashboard/index.html.twig', [
+                'totalDocuments' => 0,
+                'totalStorageLocations' => 0,
+                'usedStorageLocations' => 0,
+                'availableStorageLocations' => 0,
+                'documentsByType' => [],
                 'error' => $e->getMessage(),
             ]);
         }
     }
-} 
+
+}

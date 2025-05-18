@@ -110,54 +110,56 @@
 {% block javascripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Documents by Type Chart
-        const documentsByTypeCtx = document.getElementById('documentsByTypeChart').getContext('2d');
-        new Chart(documentsByTypeCtx, {
-            type: 'pie',
-            data: {
-                labels: {{ documentsByType|keys|json_encode|raw }},
-                datasets: [{
-                    data: {{ documentsByType|map((v, k) => v)|json_encode|raw }},
-                    backgroundColor: [
-                        '#4e73df',
-                        '#1cc88a',
-                        '#36b9cc',
-                        '#f6c23e'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
+        document.addEventListener("DOMContentLoaded", function () {
+            // Documents by Type Chart
+            const documentsByTypeCtx = document.getElementById('documentsByTypeChart').getContext('2d');
+            new Chart(documentsByTypeCtx, {
+                type: 'pie',
+                data: {
+                    labels: {{ chartLabels|json_encode|raw }},
+datasets: [{
+    data: {{ chartData|json_encode|raw }},
+    backgroundColor: [
+        '#4e73df',
+        '#1cc88a',
+        '#36b9cc',
+        '#f6c23e',
+        '#ff6384',
+        '#9966ff'
+    ]
+}]
 
-        // Storage Usage Chart
-        const storageUsageCtx = document.getElementById('storageUsageChart').getContext('2d');
-        new Chart(storageUsageCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Utilisés', 'Disponibles'],
-                datasets: [{
-                    data: [{{ usedStorageLocations }}, {{ availableStorageLocations }}],
-                    backgroundColor: [
-                        '#f6c23e',
-                        '#1cc88a'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
                     }
                 }
-            }
+            });
+
+            // Storage Usage Chart
+            const storageUsageCtx = document.getElementById('storageUsageChart').getContext('2d');
+            new Chart(storageUsageCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Utilisés', 'Disponibles'],
+                    datasets: [{
+                        data: [{{ usedStorageLocations }}, {{ availableStorageLocations }}],
+                        backgroundColor: ['#f6c23e', '#1cc88a']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
         });
     </script>
 {% endblock %}

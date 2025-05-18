@@ -21,6 +21,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
            "LOWER(d.barcode) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     Page<Document> searchDocuments(@Param("searchTerm") String searchTerm, Pageable pageable);
 
+    
     Page<Document> findByDocumentTypeId(Long documentTypeId, Pageable pageable);
     Page<Document> findByStorageLocationId(Long storageLocationId, Pageable pageable);
     Page<Document> findByCreatedById(Long userId, Pageable pageable);

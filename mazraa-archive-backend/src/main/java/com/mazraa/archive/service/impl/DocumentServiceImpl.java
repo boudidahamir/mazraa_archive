@@ -19,15 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,14 +32,12 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentTypeRepository documentTypeRepository;
     private final StorageLocationRepository storageLocationRepository;
     private final UserRepository userRepository;
-    private final String UPLOAD_DIR = "uploads/documents";
 
     @Override
     @Transactional
-    public DocumentDTO createDocument(DocumentCreateRequest request, MultipartFile file, Long userId) {
+    public DocumentDTO createDocument(DocumentCreateRequest request, Long userId) {
         if (documentRepository.existsByBarcode(request.getBarcode())) {
-            throw new ResourceAlreadyExistsException(
-                    "Document with barcode " + request.getBarcode() + " already exists");
+            throw new ResourceAlreadyExistsException("Document with barcode " + request.getBarcode() + " already exists");
         }
 
         DocumentType documentType = documentTypeRepository.findById(request.getDocumentTypeId())
@@ -57,17 +49,13 @@ public class DocumentServiceImpl implements DocumentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        String filePath = saveFile(file);
-
         Document document = new Document();
         document.setDocumentType(documentType);
         document.setBarcode(request.getBarcode());
         document.setTitle(request.getTitle());
         document.setDescription(request.getDescription());
         document.setStorageLocation(storageLocation);
-        document.setFilePath(filePath);
-        document.setFileType(file.getContentType());
-        document.setFileSize(file.getSize());
+        document.setStatus(request.getStatus());
         document.setArchived(false);
         document.setCreatedBy(user);
 
@@ -76,7 +64,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    public DocumentDTO updateDocument(Long id, DocumentUpdateRequest request, MultipartFile file, Long userId) {
+    public DocumentDTO updateDocument(Long id, DocumentUpdateRequest request, Long userId) {
         Document document = documentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found"));
 
@@ -90,18 +78,12 @@ public class DocumentServiceImpl implements DocumentService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         document.setDocumentType(documentType);
+        document.setBarcode(request.getBarcode());
         document.setTitle(request.getTitle());
         document.setDescription(request.getDescription());
         document.setStorageLocation(storageLocation);
+        document.setStatus(request.getStatus());
         document.setUpdatedBy(user);
-
-        if (file != null && !file.isEmpty()) {
-            deleteFile(document.getFilePath());
-            String filePath = saveFile(file);
-            document.setFilePath(filePath);
-            document.setFileType(file.getContentType());
-            document.setFileSize(file.getSize());
-        }
 
         return convertToDTO(documentRepository.save(document));
     }
@@ -111,6 +93,8 @@ public class DocumentServiceImpl implements DocumentService {
         return convertToDTO(documentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found")));
     }
+
+    
 
     @Override
     public DocumentDTO getDocumentByBarcode(String barcode) {
@@ -170,48 +154,9 @@ public class DocumentServiceImpl implements DocumentService {
         Document document = documentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found"));
 
-        deleteFile(document.getFilePath());
         documentRepository.delete(document);
     }
 
-    @Override
-    public byte[] downloadDocument(Long id) {
-        Document document = documentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Document not found"));
-
-        try {
-            Path path = Paths.get(document.getFilePath());
-            return Files.readAllBytes(path);
-        } catch (IOException e) {
-            throw new ResourceNotFoundException("File not found");
-        }
-    }
-
-    private String saveFile(MultipartFile file) {
-        try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(file.getInputStream(), filePath);
-
-            return filePath.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store file", e);
-        }
-    }
-
-    private void deleteFile(String filePath) {
-        try {
-            Path path = Paths.get(filePath);
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to delete file", e);
-        }
-    }
 
     @Override
     public List<DocumentDTO> getAllDocuments() {
@@ -230,15 +175,13 @@ public class DocumentServiceImpl implements DocumentService {
         dto.setDescription(document.getDescription());
         dto.setStorageLocationId(document.getStorageLocation().getId());
         dto.setStorageLocationCode(document.getStorageLocation().getCode());
-        dto.setFilePath(document.getFilePath());
-        dto.setFileType(document.getFileType());
-        dto.setFileSize(document.getFileSize());
         dto.setArchived(document.isArchived());
         dto.setArchivedAt(document.getArchivedAt());
         dto.setCreatedAt(document.getCreatedAt());
         dto.setUpdatedAt(document.getUpdatedAt());
         dto.setCreatedById(document.getCreatedBy().getId());
         dto.setCreatedByName(document.getCreatedBy().getFullName());
+        dto.setStatus(document.getStatus());
         if (document.getUpdatedBy() != null) {
             dto.setUpdatedById(document.getUpdatedBy().getId());
             dto.setUpdatedByName(document.getUpdatedBy().getFullName());
@@ -247,6 +190,7 @@ public class DocumentServiceImpl implements DocumentService {
             dto.setArchivedById(document.getArchivedBy().getId());
             dto.setArchivedByName(document.getArchivedBy().getFullName());
         }
+
         return dto;
     }
 }

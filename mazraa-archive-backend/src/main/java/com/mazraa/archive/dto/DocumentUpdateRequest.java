@@ -9,7 +9,13 @@ public class DocumentUpdateRequest {
     @NotBlank(message = "Title is required")
     private String title;
 
+    @NotBlank(message = "Barcode is required")
+    private String barcode;
+
     private String description;
+
+    @NotBlank(message = "Status is required")
+    private String status;
 
     @NotNull(message = "Document type is required")
     private Long documentTypeId;

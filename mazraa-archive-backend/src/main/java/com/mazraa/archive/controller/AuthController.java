@@ -36,7 +36,6 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // ✅ This is crucial: use the same method that builds the JWT with roles
         String jwt = tokenProvider.generateToken(authentication);
 
         return ResponseEntity.ok(Map.of("token", jwt));

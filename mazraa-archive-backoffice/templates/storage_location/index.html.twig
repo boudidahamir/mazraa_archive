@@ -15,29 +15,38 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th>Code</th>
                         <th>Nom</th>
-                        <th>Description</th>
+                        <th>Chemin</th>
                         <th>Capacité</th>
+                        <th>Utilisé</th>
+                        <th>Actif</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for location in locations %}
                         <tr>
+                            <td>{{ location.code }}</td>
                             <td>{{ location.name }}</td>
-                            <td>{{ location.description }}</td>
+                            <td>{{ location.shelf }}/{{ location.row }}/{{ location.box }}</td>
                             <td>{{ location.capacity }}</td>
+                            <td>{{ location.usedSpace ?? 0 }}</td>
+                            <td>
+                                {% if location.active %}
+                                    <span class="badge bg-success">Oui</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Non</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 <div class="btn-group">
-                                    <a href="{{ path('app_storage_locations_show', {'id': location.id}) }}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ path('app_storage_locations_edit', {'id': location.id}) }}" class="btn btn-sm btn-warning">
+                                    <a href="{{ path('app_storage_locations_edit', {'id': location.id}) }}" class="btn btn-sm btn-warning" title="Modifier">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form method="post" action="{{ path('app_storage_locations_delete', {'id': location.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?');">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ location.id) }}">
-                                        <button class="btn btn-sm btn-danger">
+                                        <button class="btn btn-sm btn-danger" title="Supprimer">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -46,11 +55,11 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="4" class="text-center">Aucun emplacement trouvé</td>
+                            <td colspan="7" class="text-center">Aucun emplacement trouvé</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-{% endblock %} 
+{% endblock %}
