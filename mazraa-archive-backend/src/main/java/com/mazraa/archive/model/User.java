@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = {"createdBy", "updatedBy"}) // évite récursion
+@ToString(exclude = { "createdBy", "updatedBy" }) // évite récursion
 @Entity
 @Table(name = "users")
 public class User {
@@ -53,12 +53,12 @@ public class User {
     private LocalDateTime updatedAt;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
     private User updatedBy;
 

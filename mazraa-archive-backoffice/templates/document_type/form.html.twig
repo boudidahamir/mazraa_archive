@@ -1,21 +1,84 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ajouter un type{% endblock %}
+{% block title %}
+    {{ type is defined and type.id is defined ? 'Modifier un type de document' : 'Nouveau type de document' }} - Mazraa Archive
+{% endblock %}
 
 {% block body %}
-    <h1>Nouveau type de document</h1>
-{% for message in app.flashes('success') %}
-    <div class="alert alert-success">{{ message }}</div>
-{% endfor %}
-{% for message in app.flashes('error') %}
-    <div class="alert alert-danger">{{ message }}</div>
-{% endfor %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            {{ type is defined and type.id is defined ? 'Modifier un type de document' : 'Nouveau type de document' }}
+        </h1>
+        <a href="{{ path('document_type_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Retour à la liste
+        </a>
+    </div>
 
-    {{ form_start(form) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.code) }}
-        {{ form_row(form.description) }}
-        <br>
-        <button class="btn btn-success">Créer</button>
-    {{ form_end(form) }}
+    <div class="card">
+        <div class="card-body">
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+
+            {% if form is defined %}
+                {{ form_start(form) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.name) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.code) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            {{ form_row(form.description) }}
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            {{ type is defined and type.id is defined ? 'Mettre à jour' : 'Créer' }}
+                        </button>
+                    </div>
+                {{ form_end(form) }}
+            {% else %}
+                <form method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="name">Nom</label>
+                            <input type="text" name="name" id="name" class="form-control" value="{{ type.name ?? '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="code">Code</label>
+                            <input type="text" name="code" id="code" class="form-control" value="{{ type.code ?? '' }}" required>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label for="description">Description</label>
+                            <textarea name="description" id="description" class="form-control">{{ type.description ?? '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            {{ type is defined and type.id is defined ? 'Mettre à jour' : 'Créer' }}
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

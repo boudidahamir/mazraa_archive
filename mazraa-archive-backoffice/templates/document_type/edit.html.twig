@@ -1,15 +1,3 @@
-{% extends 'base.html.twig' %}
+{% extends 'document_type/form.html.twig' %}
 
-{% block title %}Modifier un type{% endblock %}
-
-{% block body %}
-    <h1>Modifier type de document</h1>
-    <form method="post">
-        <label>Nom</label>
-        <input type="text" name="name" class="form-control" value="{{ type.name }}" required>
-        <label>Code</label>
-        <input type="text" name="code" class="form-control" value="{{ type.code }}" required>
-        <br>
-        <button type="submit" class="btn btn-primary">Mettre à jour</button>
-    </form>
-{% endblock %}
+{% set title = 'Modifier le type de document' %} 

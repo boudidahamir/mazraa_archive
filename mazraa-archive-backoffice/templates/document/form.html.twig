@@ -2,29 +2,57 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ document.id ? 'Modifier le document' : 'Nouveau document' }}
+    {{ document.id ? 'Modifier le document' : 'Nouveau document' }} - Mazraa Archive
 {% endblock %}
 
 {% block body %}
-    <h1>{{ document.id ? 'Modifier le document' : 'Nouveau document' }}</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            {{ document.id ? 'Modifier le document' : 'Nouveau document' }}
+        </h1>
+        <a href="{{ path('app_documents_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Retour à la liste
+        </a>
+    </div>
 
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">{{ message }}</div>
-    {% endfor %}
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form) }}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.title) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.documentType) }}
+                    </div>
+                </div>
 
-    {{ form_start(form) }}
-        {{ form_row(form.title) }}
-        {{ form_row(form.documentType) }}
-        {{ form_row(form.barcode) }}
-        {{ form_row(form.storageLocation) }}
-        {{ form_row(form.status) }}
-        {{ form_row(form.description) }}
-        <br>
-        <button class="btn btn-success">
-            {{ document.id ? 'Mettre à jour' : 'Créer' }}
-        </button>
-    {{ form_end(form) }}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.barcode) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.storageLocation) }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.status) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.description) }}
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        {{ document.id ? 'Mettre à jour' : 'Créer' }}
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
 {% endblock %}
