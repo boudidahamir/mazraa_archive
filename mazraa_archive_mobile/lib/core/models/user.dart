@@ -22,6 +22,8 @@ class User {
   final DateTime? updatedAt;
   final int? createdById;
   final int? updatedById;
+  final bool? isActive;
+  final String? roles;
 
   User({
     this.id,
@@ -35,38 +37,29 @@ class User {
     this.updatedAt,
     this.createdById,
     this.updatedById,
+    this.isActive,
+    this.roles,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
-  Map<String, dynamic> toJson() => _$UserToJson(this);
-
-  User copyWith({
-    int? id,
-    String? username,
-    String? email,
-    String? fullName,
-    UserRole? role,
-    bool? enabled,
-    String? deviceId,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    int? createdById,
-    int? updatedById,
-  }) {
+  factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: id ?? this.id,
-      username: username ?? this.username,
-      email: email ?? this.email,
-      fullName: fullName ?? this.fullName,
-      role: role ?? this.role,
-      enabled: enabled ?? this.enabled,
-      deviceId: deviceId ?? this.deviceId,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      createdById: createdById ?? this.createdById,
-      updatedById: updatedById ?? this.updatedById,
+      id: json['id'],
+      username: json['username'],
+      email: json['email'],
+      fullName: json['fullName'],
+      role: $enumDecode(_$UserRoleEnumMap, json['role']),
+      enabled: json['enabled'] ?? true,
+      deviceId: json['deviceId'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      createdById: json['createdBy']?['id'],
+      updatedById: json['updatedBy']?['id'],
+      isActive: json['isActive'],
+      roles: json['roles'],
     );
   }
 
+  Map<String, dynamic> toJson() => _$UserToJson(this);
+
   bool get isAdmin => role == UserRole.admin;
-} 
+}

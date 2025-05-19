@@ -1,11 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mazraa_archive_mobile/core/models/document_type.dart';
 
 part 'generated_barcode.g.dart';
 
 @JsonSerializable()
 class GeneratedBarcode {
   final String barcode;
-  final String documentType;
+  final DocumentType documentType;
   final DateTime generatedAt;
   final bool isUsed;
   final String? documentId;
@@ -27,7 +28,7 @@ class GeneratedBarcode {
 
   GeneratedBarcode copyWith({
     String? barcode,
-    String? documentType,
+    DocumentType? documentType,
     DateTime? generatedAt,
     bool? isUsed,
     String? documentId,

@@ -32,7 +32,6 @@ public class DocumentController {
         return ResponseEntity.ok(documentService.getAllDocuments());
     }
 
-    
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @AuditLog(action = "CREATE_DOCUMENT", entityType = "DOCUMENT", details = "Created new document")
@@ -71,7 +70,6 @@ public class DocumentController {
             Pageable pageable) {
         return ResponseEntity.ok(documentService.searchDocuments(searchTerm, pageable));
     }
-    
 
     @GetMapping("/type/{documentTypeId}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -121,4 +119,11 @@ public class DocumentController {
         documentService.deleteDocument(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/by-type-code/{code}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<DocumentDTO>> getDocumentsByTypeCode(@PathVariable String code) {
+        return ResponseEntity.ok(documentService.getDocumentsByTypeCode(code));
+    }
+
 }

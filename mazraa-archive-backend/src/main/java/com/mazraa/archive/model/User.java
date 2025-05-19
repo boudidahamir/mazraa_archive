@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = { "createdBy", "updatedBy" }) // évite récursion
+@ToString(exclude = { "createdBy", "updatedBy" })
 @Entity
 @Table(name = "users")
 public class User {

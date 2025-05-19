@@ -294,4 +294,15 @@ class LocalStorageService {
       whereArgs: [barcode],
     );
   }
+
+  Future<Document?> getDocumentByBarcode(String barcode) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'documents',
+      where: 'barcode = ?',
+      whereArgs: [barcode],
+    );
+    if (maps.isEmpty) return null;
+    return Document.fromJson(maps.first);
+  }
 } 

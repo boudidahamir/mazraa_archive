@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'user.dart';
 
 part 'storage_location.g.dart';
 
@@ -8,35 +9,36 @@ class StorageLocation {
   final String code;
   final String name;
   final String? description;
-  final String? shelf;
-  final String? row;
-  final String? box;
+  final String shelf;
+  final String row;
+  final String box;
   final int capacity;
   final int usedSpace;
   final bool active;
   final DateTime createdAt;
   final DateTime? updatedAt;
-  final int? createdById;
-  final int? updatedById;
+  final User? createdBy;
+  final User? updatedBy;
 
   StorageLocation({
     this.id,
     required this.code,
     required this.name,
     this.description,
-    this.shelf,
-    this.row,
-    this.box,
+    required this.shelf,
+    required this.row,
+    required this.box,
     required this.capacity,
     this.usedSpace = 0,
     this.active = true,
     required this.createdAt,
     this.updatedAt,
-    this.createdById,
-    this.updatedById,
+    this.createdBy,
+    this.updatedBy,
   });
 
-  factory StorageLocation.fromJson(Map<String, dynamic> json) => _$StorageLocationFromJson(json);
+  factory StorageLocation.fromJson(Map<String, dynamic> json) =>
+      _$StorageLocationFromJson(json);
   Map<String, dynamic> toJson() => _$StorageLocationToJson(this);
 
   StorageLocation copyWith({
@@ -52,8 +54,8 @@ class StorageLocation {
     bool? active,
     DateTime? createdAt,
     DateTime? updatedAt,
-    int? createdById,
-    int? updatedById,
+    User? createdBy,
+    User? updatedBy,
   }) {
     return StorageLocation(
       id: id ?? this.id,
@@ -68,11 +70,11 @@ class StorageLocation {
       active: active ?? this.active,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      createdById: createdById ?? this.createdById,
-      updatedById: updatedById ?? this.updatedById,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
     );
   }
 
   bool get hasAvailableSpace => usedSpace < capacity;
   int get availableSpace => capacity - usedSpace;
-} 
+}

@@ -48,7 +48,7 @@ class DocumentListItem extends StatelessWidget {
             leading: CircleAvatar(
               backgroundColor: Theme.of(context).primaryColor,
               child: Text(
-                document.documentType[0].toUpperCase(),
+                document.documentTypeName.characters.first.toUpperCase(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -66,7 +66,7 @@ class DocumentListItem extends StatelessWidget {
               children: [
                 const SizedBox(height: 4),
                 Text(
-                  'Type: ${document.documentType}',
+                  'Type: ${document.documentTypeName}',
                   style: const TextStyle(fontSize: 12),
                 ),
                 const SizedBox(height: 2),
@@ -74,13 +74,11 @@ class DocumentListItem extends StatelessWidget {
                   'Barcode: ${document.barcode}',
                   style: const TextStyle(fontSize: 12),
                 ),
-                if (document.storageLocation != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    'Location: ${document.storageLocation}',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
+                const SizedBox(height: 2),
+                Text(
+                  'Location: ${document.storageLocationCode}',
+                  style: const TextStyle(fontSize: 12),
+                ),
               ],
             ),
             trailing: Column(
@@ -126,4 +124,4 @@ class DocumentListItem extends StatelessWidget {
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-} 
+}

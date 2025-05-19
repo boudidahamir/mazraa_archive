@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../services/api_service.dart';
 import '../../../documents/presentation/screens/documents_screen.dart';
-import '../../../storage/presentation/screens/storage_screen.dart';
 import '../../../scan/presentation/screens/scan_screen.dart';
-import '../../../profile/presentation/screens/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,9 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = [
     const DocumentsScreen(),
-    const StorageScreen(),
     const ScanScreen(),
-    const ProfileScreen(),
   ];
 
   @override

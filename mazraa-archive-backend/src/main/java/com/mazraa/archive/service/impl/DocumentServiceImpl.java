@@ -193,4 +193,14 @@ public class DocumentServiceImpl implements DocumentService {
 
         return dto;
     }
+
+    @Override
+    public List<DocumentDTO> getDocumentsByTypeCode(String code) {
+        DocumentType type = documentTypeRepository.findByCode(code)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid document type code: " + code));
+    
+        List<Document> documents = documentRepository.findByDocumentType(type);
+        return documents.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+    
 }

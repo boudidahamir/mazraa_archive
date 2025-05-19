@@ -21,4 +21,6 @@ public interface DocumentService {
     void archiveDocument(Long id, Long userId);
     void deleteDocument(Long id);
     List<DocumentDTO> getAllDocuments();
+    List<DocumentDTO> getDocumentsByTypeCode(String code);
+    
 }

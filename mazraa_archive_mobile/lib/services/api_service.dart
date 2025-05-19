@@ -1,13 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../core/models/document.dart';
+import '../core/models/document_type.dart';
 import '../core/models/storage_location.dart';
-import '../core/models/user.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
   final Dio _dio;
   final FlutterSecureStorage _storage;
-  static const String _baseUrl = 'http://localhost:8080/api';
+  static String _baseUrl = dotenv.env['BASE_URL'] ?? 'http://fallback:8080/api';
 
   ApiService()
       : _dio = Dio(BaseOptions(
@@ -95,12 +96,15 @@ class ApiService {
   }
 
   // Barcode
-  Future<String> generateBarcode(String documentType) async {
-    final response = await _dio.post('/barcodes/generate', data: {
+  Future<String> generateBarcode(String documentType, int documentId) async {
+    final response = await _dio.post('/barcodes/generate', queryParameters: {
       'documentType': documentType,
+      'id': documentId,
     });
-    return response.data['barcode'];
+
+    return response.data;
   }
+
 
   Future<bool> validateBarcode(String barcode) async {
     final response = await _dio.post('/barcodes/validate', data: {
@@ -129,4 +133,42 @@ class ApiService {
       'resolution': resolution,
     });
   }
+
+  // Fetch a document by barcode
+  Future<Document?> getDocumentByBarcode(String barcode) async {
+    final response = await _dio.get('/documents/barcode/$barcode');
+    if (response.data == null) return null;
+    return Document.fromJson(response.data);
+  }
+
+  // Alias for getStorageLocations
+  Future<List<StorageLocation>> getAvailableLocations() async {
+    return getStorageLocations();
+  }
+
+  Future<List<Document>> getDocumentsByType(String documentTypeCode) async {
+    final response = await _dio.get('/documents/by-type-code/$documentTypeCode');
+    if (response.statusCode == 200) {
+      return (response.data as List).map((json) => Document.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load documents');
+    }
+  }
+
+  Future<List<DocumentType>> getDocumentTypes() async {
+    final response = await _dio.get('/document-types');
+
+    if (response.statusCode == 200) {
+      return (response.data as List)
+          .map((json) => DocumentType.fromJson(json))
+          .toList();
+    } else {
+      throw Exception('Failed to load document types');
+    }
+  }
+
+  getStorageLocationById(int i) {
+
+  }
+
 } 
