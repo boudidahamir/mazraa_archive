@@ -74,6 +74,44 @@ class StorageLocation {
       updatedBy: updatedBy ?? this.updatedBy,
     );
   }
+  Map<String, dynamic> toSqliteMap({String syncStatus = 'synced'}) {
+    return {
+      'id': id,
+      'code': code,
+      'name': name,
+      'description': description,
+      'shelf': shelf,
+      'row': row,
+      'box': box,
+      'capacity': capacity,
+      'usedSpace': usedSpace,
+      'active': active ? 1 : 0,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'createdById': createdBy?.id,
+      'updatedById': updatedBy?.id,
+      'sync_status': syncStatus,
+    };
+  }
+
+  factory StorageLocation.fromSqlite(Map<String, dynamic> map) {
+    return StorageLocation(
+      id: map['id'],
+      code: map['code'],
+      name: map['name'],
+      description: map['description'],
+      shelf: map['shelf'],
+      row: map['row'],
+      box: map['box'],
+      capacity: map['capacity'],
+      usedSpace: map['usedSpace'] ?? 0,
+      active: map['active'] == 1, // 🔥 SQLite uses 0/1 for bool
+      createdAt: DateTime.parse(map['createdAt']),
+      updatedAt: map['updatedAt'] != null ? DateTime.parse(map['updatedAt']) : null,
+      createdBy: null, // You can populate if needed
+      updatedBy: null,
+    );
+  }
 
   bool get hasAvailableSpace => usedSpace < capacity;
   int get availableSpace => capacity - usedSpace;

@@ -337,79 +337,82 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                               : null,
                           onTap: location.hasAvailableSpace
                               ? () async {
-                                  try {
-                                    final updatedDocument = document.copyWith(
-                                      storageLocationId: location.id,
-                                      storageLocationCode: location.code,
-                                    );
+                            try {
+                              final updatedDocument = document.copyWith(
+                                storageLocationId: location.id,
+                                storageLocationCode: location.code,
+                              );
 
+                              if (_isOnline) {
+                                // ✅ 1. Update document on server
+                                await apiService.updateDocument(document.id!, updatedDocument);
+                                await localStorage.saveDocument(updatedDocument);
 
+                                // ✅ 2. Increment used space
+                                final updatedLocation = location.copyWith(
+                                  usedSpace: location.usedSpace + 1,
+                                );
+                                await apiService.updateStorageLocation(location.id!, updatedLocation);
+                                await localStorage.saveStorageLocation(updatedLocation);
+                              } else {
+                                // Offline mode: queue update
+                                await localStorage.saveDocument(
+                                  updatedDocument,
+                                  syncStatus: 'pending',
+                                );
+                                await localStorage.addSyncLog(
+                                  'document',
+                                  document.id!,
+                                  'update',
+                                  updatedDocument.toJson(),
+                                  await syncService.getDeviceId(),
+                                );
+                              }
 
-                                    if (_isOnline) {
-                                      // Update online
-                                      await apiService.updateDocument(
-                                        document.id!,
-                                        updatedDocument,
-                                      );
-                                      await localStorage.saveDocument(updatedDocument);
-                                    } else {
-                                      // Save locally and queue for sync
-                                      await localStorage.saveDocument(
-                                        updatedDocument,
-                                        syncStatus: 'pending',
-                                      );
-                                      await localStorage.addSyncLog(
-                                        'document',
-                                        document.id!,
-                                        'update',
-                                        updatedDocument.toJson(),
-                                        await syncService.getDeviceId(),
-                                      );
-                                    }
-
-                                    if (!mounted) return;
-                                    Navigator.of(context).pop();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Row(
-                                          children: [
-                                            const Icon(Icons.check_circle, color: Colors.white),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                _isOnline
-                                                    ? 'Location assigned successfully'
-                                                    : 'Location assigned (will sync when online)',
-                                              ),
-                                            ),
-                                          ],
+                              if (!mounted) return;
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Row(
+                                    children: [
+                                      const Icon(Icons.check_circle, color: Colors.white),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _isOnline
+                                              ? 'Location assigned successfully'
+                                              : 'Location assigned (will sync when online)',
                                         ),
-                                        backgroundColor: _isOnline ? Colors.green : Colors.orange,
                                       ),
-                                    );
-                                    setState(() {
-                                      _isScanning = true;
-                                      _isProcessing = false;
-                                    });
-                                  } catch (e) {
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Row(
-                                          children: [
-                                            const Icon(Icons.error_outline, color: Colors.white),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text('Failed to assign location: $e'),
-                                            ),
-                                          ],
-                                        ),
-                                        backgroundColor: Theme.of(context).colorScheme.error,
+                                    ],
+                                  ),
+                                  backgroundColor: _isOnline ? Colors.green : Colors.orange,
+                                ),
+                              );
+                              setState(() {
+                                _isScanning = true;
+                                _isProcessing = false;
+                              });
+                            } catch (e) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Row(
+                                    children: [
+                                      const Icon(Icons.error_outline, color: Colors.white),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text('Failed to assign location: $e'),
                                       ),
-                                    );
-                                  }
-                                }
+                                    ],
+                                  ),
+                                  backgroundColor: Theme.of(context).colorScheme.error,
+                                ),
+                              );
+                            }
+                          }
                               : null,
+
                         ),
                       );
                     },
@@ -581,7 +584,6 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                   ),
                 ),
                 const SizedBox(height: 16),
-                if (_isOnline)
                   FloatingActionButton.extended(
                     onPressed: () {
                       Navigator.of(context).push(

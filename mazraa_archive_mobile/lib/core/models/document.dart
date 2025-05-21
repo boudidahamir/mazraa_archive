@@ -99,6 +99,47 @@ class Document {
     );
   }
 
+  Map<String, dynamic> toSqliteMap({String syncStatus = 'synced'}) {
+    return {
+      'id': id,
+      'title': title,
+      'barcode': barcode,
+      'description': description,
+      'status': status,
+      'document_type': documentTypeName, // name only
+      'storage_location': storageLocationCode, // code only
+      'archived': archived ? 1 : 0,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'created_by_id': createdById,
+      'updated_by_id': updatedById,
+      'sync_status': syncStatus,
+    };
+  }
+  factory Document.fromSqlite(Map<String, dynamic> map) {
+    return Document(
+      id: map['id'],
+      title: map['title'],
+      barcode: map['barcode'],
+      description: map['description'],
+      status: map['status'],
+      documentTypeId: 0, // or store & load actual ID separately if needed
+      documentTypeName: map['document_type'] ?? '',
+      storageLocationId: 0, // or store & load actual ID separately if needed
+      storageLocationCode: map['storage_location'] ?? '',
+      archived: map['archived'] == 1,
+      archivedAt: map['archived_at'] != null ? DateTime.tryParse(map['archived_at']) : null,
+      archivedById: null,
+      archivedByName: '',
+      createdAt: DateTime.parse(map['created_at']),
+      updatedAt: map['updated_at'] != null ? DateTime.tryParse(map['updated_at']) : null,
+      createdById: map['created_by_id'],
+      createdByName: '',
+      updatedById: map['updated_by_id'],
+      updatedByName: '',
+    );
+  }
+
   factory Document.fromJson(Map<String, dynamic> json) =>
       _$DocumentFromJson(json);
 

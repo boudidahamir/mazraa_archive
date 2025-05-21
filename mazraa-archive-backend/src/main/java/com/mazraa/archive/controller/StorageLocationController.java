@@ -53,7 +53,7 @@ public ResponseEntity<List<StorageLocationDTO>> getAllStorageLocations() {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public ResponseEntity<StorageLocationDTO> getStorageLocation(@PathVariable Long id) {
         return ResponseEntity.ok(storageLocationService.getStorageLocation(id));
     }
@@ -82,7 +82,7 @@ public ResponseEntity<List<StorageLocationDTO>> getAllStorageLocations() {
     }
 
     @GetMapping("/available")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public ResponseEntity<Page<StorageLocationDTO>> getAvailableStorageLocations(Pageable pageable) {
         return ResponseEntity.ok(storageLocationService.getAvailableStorageLocations(pageable));
     }

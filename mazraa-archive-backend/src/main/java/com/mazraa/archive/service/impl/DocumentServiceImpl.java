@@ -85,6 +85,17 @@ public class DocumentServiceImpl implements DocumentService {
         document.setStatus(request.getStatus());
         document.setUpdatedBy(user);
 
+        if(request.getStatus() == "ARCHIVED"){
+            System.out.println("Document is archived");
+            document.setArchived(true);
+            document.setArchivedAt(LocalDateTime.now());
+            document.setArchivedBy(user);
+        }
+        else{
+            document.setArchived(false);
+            document.setArchivedAt(null);
+            document.setArchivedBy(user);
+        }
         return convertToDTO(documentRepository.save(document));
     }
 

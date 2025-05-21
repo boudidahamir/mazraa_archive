@@ -141,9 +141,13 @@ class ApiService {
     return Document.fromJson(response.data);
   }
 
-  // Alias for getStorageLocations
   Future<List<StorageLocation>> getAvailableLocations() async {
-    return getStorageLocations();
+    final response = await _dio.get('/storage-locations/available?page=0&size=20&sort=name');
+
+    final data = response.data;
+    final list = data['content'] as List;
+
+    return list.map((json) => StorageLocation.fromJson(json)).toList();
   }
 
   Future<List<Document>> getDocumentsByType(String documentTypeCode) async {
@@ -170,5 +174,29 @@ class ApiService {
   getStorageLocationById(int i) {
 
   }
+
+  Future<void> updateDocumentBarcode({
+    required int documentId,
+    required String barcode,
+    required int storageLocationId,
+    required int documentTypeId,
+    required String title,
+    required String description,
+  }) async {
+    final response = await _dio.put('/documents/$documentId', data: {
+      'barcode': barcode,
+      'storageLocationId': storageLocationId,
+      'documentTypeId': documentTypeId,
+      'title': title,
+      'description': description,
+      'status': 'ARCHIVED', // or "ARCHIVED" if needed
+    });
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update document');
+    }
+  }
+
+
 
 } 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../documents/presentation/screens/documents_screen.dart';
+import 'package:mazraa_archive_mobile/features/auth/presentation/screens/profile_screen.dart';
 import '../../../scan/presentation/screens/scan_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,8 +13,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const DocumentsScreen(),
     const ScanScreen(),
+    const ProfileScreen()
   ];
 
   @override
@@ -29,14 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.description),
-            label: 'Documents',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.storage),
-            label: 'Storage',
-          ),
           NavigationDestination(
             icon: Icon(Icons.qr_code_scanner),
             label: 'Scan',

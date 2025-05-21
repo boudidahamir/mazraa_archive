@@ -1,4 +1,6 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import '../../../../services/api_service.dart';
 import '../screens/home_screen.dart';
@@ -16,7 +18,7 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
-
+  final _secureStorage = const FlutterSecureStorage();
   @override
   void dispose() {
     _usernameController.dispose();
@@ -32,12 +34,29 @@ class _LoginFormState extends State<LoginForm> {
       _errorMessage = null;
     });
 
+    final connectivityResult = await Connectivity().checkConnectivity();
+    final isOnline = connectivityResult != ConnectivityResult.none;
+
+    final apiService = context.read<ApiService>();
+    final secureStorage = const FlutterSecureStorage();
+
     try {
-      final apiService = context.read<ApiService>();
-      await apiService.login(
-        _usernameController.text,
-        _passwordController.text,
-      );
+      if (isOnline) {
+        await apiService.login(
+          _usernameController.text,
+          _passwordController.text,
+        );
+
+        await secureStorage.write(key: 'username', value: _usernameController.text);
+        await secureStorage.write(key: 'password', value: _passwordController.text);
+      } else {
+        final savedUsername = await secureStorage.read(key: 'username');
+        final savedPassword = await secureStorage.read(key: 'password');
+
+        if (_usernameController.text != savedUsername || _passwordController.text != savedPassword) {
+          throw Exception('Offline login failed');
+        }
+      }
 
       if (mounted) {
         Navigator.of(context).pushReplacement(

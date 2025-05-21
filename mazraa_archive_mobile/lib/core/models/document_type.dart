@@ -24,6 +24,19 @@ class DocumentType {
     this.updatedById,
   });
 
+  factory DocumentType.fromSqlite(Map<String, dynamic> map) {
+    return DocumentType(
+      id: map['id'],
+      name: map['name'],
+      code: map['code'],
+      description: map['description'],
+      createdAt: DateTime.parse(map['created_at']),
+      updatedAt: DateTime.parse(map['updated_at']),
+      createdById: map['created_by_id'],
+      updatedById: map['updated_by_id'],
+    );
+  }
+
   factory DocumentType.fromJson(Map<String, dynamic> json) => _$DocumentTypeFromJson(json);
   Map<String, dynamic> toJson() => _$DocumentTypeToJson(this);
 }

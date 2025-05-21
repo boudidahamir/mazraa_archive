@@ -1,15 +1,16 @@
 package com.mazraa.archive.service.impl;
 
+import com.mazraa.archive.model.DocumentType;
+import com.mazraa.archive.repository.DocumentTypeRepository;
+import com.mazraa.archive.service.BarcodeService;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.oned.Code128Writer;
-import com.mazraa.archive.service.BarcodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,15 +18,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class BarcodeServiceImpl implements BarcodeService {
 
-    private static final Map<String, String> DOCUMENT_TYPE_PREFIXES = new HashMap<>();
+    private final DocumentTypeRepository documentTypeRepository;
+
     private static final String SEPARATOR = "-";
     private static final Map<String, Long> BARCODE_LOCATION_MAP = new ConcurrentHashMap<>();
 
-    static {
-        DOCUMENT_TYPE_PREFIXES.put("FACTURE", "F");
-        DOCUMENT_TYPE_PREFIXES.put("BON_LIVRAISON", "BL");
-        DOCUMENT_TYPE_PREFIXES.put("ORDRE_PAIEMENT", "OP");
-        DOCUMENT_TYPE_PREFIXES.put("FICHE_PAIE", "FP");
+    @Override
+    public String getBarcodePrefix(String documentTypeCode) {
+        DocumentType type = documentTypeRepository.findByCode(documentTypeCode)
+                .orElseThrow(() -> new IllegalArgumentException("Document type not found: " + documentTypeCode));
+        return type.getCode();
     }
 
     @Override
@@ -46,26 +48,13 @@ public class BarcodeServiceImpl implements BarcodeService {
 
     @Override
     public boolean validateBarcode(String barcode) {
-        if (barcode == null || barcode.isEmpty()) {
-            return false;
-        }
+        if (barcode == null || barcode.isEmpty()) return false;
 
         String[] parts = barcode.split(SEPARATOR);
-        if (parts.length != 2) {
-            return false;
-        }
+        if (parts.length != 2) return false;
 
-        String prefix = parts[0];
-        String id = parts[1];
-
-        // Validate prefix
-        if (!DOCUMENT_TYPE_PREFIXES.containsValue(prefix)) {
-            return false;
-        }
-
-        // Validate ID format
         try {
-            Long.parseLong(id);
+            Long.parseLong(parts[1]);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -78,15 +67,6 @@ public class BarcodeServiceImpl implements BarcodeService {
             throw new IllegalArgumentException("Invalid barcode format");
         }
         return barcode.split(SEPARATOR)[1];
-    }
-
-    @Override
-    public String getBarcodePrefix(String documentType) {
-        String prefix = DOCUMENT_TYPE_PREFIXES.get(documentType);
-        if (prefix == null) {
-            throw new IllegalArgumentException("Invalid document type: " + documentType);
-        }
-        return prefix;
     }
 
     @Override
@@ -104,4 +84,4 @@ public class BarcodeServiceImpl implements BarcodeService {
         }
         return BARCODE_LOCATION_MAP.get(barcode);
     }
-} 
+}
