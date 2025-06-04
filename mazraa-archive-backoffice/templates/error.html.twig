@@ -1,11 +1,47 @@
 {# templates/error.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Erreur{% endblock %}
+{% block title %}Erreur - Mazraa Archive{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active">Erreur</li>
+{% endblock %}
 
 {% block body %}
-    <div class="alert alert-danger mt-4">
-        <h4>Une erreur est survenue</h4>
-        <p>{{ error|default('Erreur inconnue') }}</p>
+    <div class="d-flex justify-content-center align-items-center" style="min-height: 60vh;">
+        <div class="text-center">
+            <div class="mb-4">
+                <i class="fas fa-exclamation-triangle fa-4x text-danger"></i>
+            </div>
+            <h1 class="display-4 mb-4">Oups !</h1>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title text-danger mb-4">
+                        <i class="fas fa-times-circle me-2"></i>Une erreur est survenue
+                    </h4>
+                    <p class="card-text lead mb-4">{{ error|default('Erreur inconnue') }}</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('app_dashboard') }}" class="btn btn-primary">
+                                <i class="fas fa-home me-2"></i>Retour à l'accueil
+                            </a>
+                        {% else %}
+                            <a href="{{ path('app_login') }}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                            </a>
+                        {% endif %}
+                        <button onclick="history.back()" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Page précédente
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 text-muted">
+                <small>
+                    <i class="fas fa-info-circle me-1"></i>
+                    Si le problème persiste, veuillez contacter l'administrateur système.
+                </small>
+            </div>
+        </div>
     </div>
 {% endblock %}

@@ -52,13 +52,13 @@ public class AuditLogAspect {
                     // Improved entity ID extraction
                     Long entityId = extractEntityId(joinPoint, auditLog, result);
                     
-                    auditLogService.logAction(
+                    auditLogService.log(
                         auditLog.action(),
                         auditLog.entityType(),
                         entityId,
+                        userId,
                         auditLog.details(),
-                        ipAddress,
-                        userId
+                        ipAddress
                     );
                 } else {
                     System.err.println("[AuditLogAspect] Warning: could not resolve userId for audit");
@@ -72,16 +72,23 @@ public class AuditLogAspect {
     }
 
     private Long extractEntityId(ProceedingJoinPoint joinPoint, AuditLog auditLog, Object result) {
-        // If the method returns a User entity, get its ID
+        // If the method returns a ResponseEntity, get its ID from the body
         if (result instanceof ResponseEntity) {
             Object body = ((ResponseEntity<?>) result).getBody();
-            if (body instanceof UserDTO userDto) {
-                return userDto.getId();
+            if (body != null) {
+                try {
+                    // Try to get id using reflection
+                    return (Long) body.getClass().getMethod("getId").invoke(body);
+                } catch (Exception ignored) {
+                    // If getId() method doesn't exist or fails, continue to other methods
+                }
             }
         }
         
         // Check method arguments for ID
-        for (Object arg : joinPoint.getArgs()) {
+        Object[] args = joinPoint.getArgs();
+        for (int i = 0; i < args.length; i++) {
+            Object arg = args[i];
             if (arg instanceof Long) {
                 return (Long) arg;
             } else if (arg instanceof String && "username".equals(auditLog.entityType())) {

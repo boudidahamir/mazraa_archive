@@ -45,8 +45,8 @@ class CreateAdminCommand extends Command
 
         $user = new User();
         $user->setEmail($email);
-        $user->setRoles(['ROLE_ADMIN']);
-        $user->setIsActive(true);
+        $user->setRole(User::ROLE_ADMIN);
+        $user->setenabled(true);
 
         $hashedPassword = $this->passwordHasher->hashPassword(
             $user,

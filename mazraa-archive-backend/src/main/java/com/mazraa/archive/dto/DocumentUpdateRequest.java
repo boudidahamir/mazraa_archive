@@ -9,7 +9,6 @@ public class DocumentUpdateRequest {
     @NotBlank(message = "Title is required")
     private String title;
 
-    @NotBlank(message = "Barcode is required")
     private String barcode;
 
     private String description;
@@ -20,6 +19,5 @@ public class DocumentUpdateRequest {
     @NotNull(message = "Document type is required")
     private Long documentTypeId;
 
-    @NotNull(message = "Storage location is required")
     private Long storageLocationId;
 } 

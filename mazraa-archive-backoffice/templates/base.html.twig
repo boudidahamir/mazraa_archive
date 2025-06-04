@@ -11,13 +11,139 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --dark-bg: #343a40;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            background-color: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .nav-link.active {
+            color: white !important;
+            background-color: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn {
+            border-radius: 6px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .table {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-control {
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+        }
+    </style>
+
     {% block stylesheets %}{% endblock %}
 </head>
 <body>
 {% if app.request.attributes.get('_route') != 'app_login' %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ path('app_dashboard') }}">Mazraa Archive</a>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ path('app_dashboard') }}">
+                <img src="{{ asset('images/logo.svg') }}" alt="Mazraa Archive" height="40" class="me-2">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -26,33 +152,55 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_documents_index') }}">Documents</a>
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_documents' ? 'active' }}" 
+                           href="{{ path('app_documents_index') }}">
+                            <i class="fas fa-file-alt me-2"></i>Documents
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_storage_locations_index') }}">Emplacements</a>
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_storage_locations' ? 'active' }}" 
+                           href="{{ path('app_storage_locations_index') }}">
+                            <i class="fas fa-warehouse me-2"></i>Emplacements
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('document_type_index') }}">Types de documents</a>
+                        <a class="nav-link {{ app.request.get('_route') starts with 'document_type' ? 'active' }}" 
+                           href="{{ path('document_type_index') }}">
+                            <i class="fas fa-tags me-2"></i>Types de documents
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('user_index') }}">Utilisateur</a>
+                        <a class="nav-link {{ app.request.get('_route') starts with 'user' ? 'active' }}" 
+                           href="{{ path('user_index') }}">
+                            <i class="fas fa-users me-2"></i>Utilisateurs
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('audit_log_index') }}">Historique</a>
+                        <a class="nav-link {{ app.request.get('_route') starts with 'audit_log' ? 'active' }}" 
+                           href="{{ path('audit_log_index') }}">
+                            <i class="fas fa-history me-2"></i>Historique
+                        </a>
                     </li>
                 </ul>
 
                 <ul class="navbar-nav">
                     {% if app.user %}
-                        <li class="nav-item">
-                            <span class="nav-link disabled">{{ app.user.username }}</span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_logout') }}">Déconnexion</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-2"></i>{{ app.user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{{ path('app_logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                                </a></li>
+                            </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
+                            <a class="nav-link" href="{{ path('app_login') }}">
+                                <i class="fas fa-sign-in-alt me-2"></i>Connexion
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -60,15 +208,25 @@
         </div>
     </nav>
 {% endif %}
-    <main class="container mt-4">
+
+    <main class="container py-4">
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
-                    {{ message }}
+                    <i class="fas fa-info-circle me-2"></i>{{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         {% endfor %}
+
+        {% if app.request.attributes.get('_route') != 'app_login' %}
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Accueil</a></li>
+                    {% block breadcrumb %}{% endblock %}
+                </ol>
+            </nav>
+        {% endif %}
 
         {% block body %}{% endblock %}
     </main>
@@ -78,6 +236,30 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Custom JS -->
+    <script>
+        // Add active class to current nav item
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+
+    <!-- JsBarcode Library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
     {% block javascripts %}{% endblock %}
 </body>

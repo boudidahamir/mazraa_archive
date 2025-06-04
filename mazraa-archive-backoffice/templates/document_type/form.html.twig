@@ -1,84 +1,272 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ type is defined and type.id is defined ? 'Modifier un type de document' : 'Nouveau type de document' }} - Mazraa Archive
+    {{ type is defined and type.id is defined ? 'Modifier le type de document' : 'Nouveau type de document' }} - Mazraa Archive
+{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{{ path('document_type_index') }}">Types de documents</a>
+    </li>
+    <li class="breadcrumb-item active">
+        {{ type is defined and type.id is defined ? 'Modifier' : 'Nouveau' }}
+    </li>
 {% endblock %}
 
 {% block body %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">
-            {{ type is defined and type.id is defined ? 'Modifier un type de document' : 'Nouveau type de document' }}
+        <h1 class="page-title">
+            <i class="fas fa-{{ type is defined and type.id is defined ? 'edit' : 'plus-circle' }} me-2"></i>
+            {{ type is defined and type.id is defined ? 'Modifier le type de document' : 'Nouveau type de document' }}
+            {% if type is defined and type.id is defined %}
+                <small class="text-muted fs-6 ms-2">#{{ type.id }}</small>
+            {% endif %}
         </h1>
-        <a href="{{ path('document_type_index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>
-            Retour à la liste
+        <a href="{{ path('document_type_index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
         </a>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            {% for message in app.flashes('success') %}
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations du type
+                    </h5>
                 </div>
-            {% endfor %}
-            {% for message in app.flashes('error') %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="card-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+
+                    {% if form is defined %}
+                        {{ form_start(form) }}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(form.name) }}
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-tag"></i>
+                                            </span>
+                                            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                                        </div>
+                                        {{ form_errors(form.name) }}
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>Nom unique du type de document
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(form.code) }}
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-hashtag"></i>
+                                            </span>
+                                            {{ form_widget(form.code, {'attr': {'class': 'form-control'}}) }}
+                                        </div>
+                                        {{ form_errors(form.code) }}
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>Code unique d'identification
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        {{ form_label(form.description) }}
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-align-left"></i>
+                                            </span>
+                                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '3'}}) }}
+                                        </div>
+                                        {{ form_errors(form.description) }}
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>Description détaillée du type de document
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-{{ type is defined and type.id is defined ? 'save' : 'plus-circle' }} me-2"></i>
+                                    {{ type is defined and type.id is defined ? 'Mettre à jour' : 'Créer le type' }}
+                                </button>
+                            </div>
+                        {{ form_end(form) }}
+                    {% else %}
+                        <form method="post" class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="name" class="form-label">
+                                        <i class="fas fa-tag me-1"></i>Nom
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-tag"></i>
+                                        </span>
+                                        <input type="text" name="name" id="name" class="form-control" value="{{ type.name ?? '' }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="code" class="form-label">
+                                        <i class="fas fa-hashtag me-1"></i>Code
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-hashtag"></i>
+                                        </span>
+                                        <input type="text" name="code" id="code" class="form-control" value="{{ type.code ?? '' }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="description" class="form-label">
+                                        <i class="fas fa-align-left me-1"></i>Description
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-align-left"></i>
+                                        </span>
+                                        <textarea name="description" id="description" class="form-control" rows="3">{{ type.description ?? '' }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-{{ type is defined and type.id is defined ? 'save' : 'plus-circle' }} me-2"></i>
+                                    {{ type is defined and type.id is defined ? 'Mettre à jour' : 'Créer le type' }}
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
                 </div>
-            {% endfor %}
+            </div>
+        </div>
 
-            {% if form is defined %}
-                {{ form_start(form) }}
-                    <div class="row">
-                        <div class="col-md-6">
-                            {{ form_row(form.name) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_row(form.code) }}
-                        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Aide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-tag me-2"></i>Nom</h6>
+                        <p class="text-muted small">Le nom doit être unique et descriptif pour faciliter la recherche.</p>
                     </div>
-                    <div class="row">
-                        <div class="col-12">
-                            {{ form_row(form.description) }}
-                        </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-hashtag me-2"></i>Code</h6>
+                        <p class="text-muted small">Le code est utilisé pour identifier rapidement le type de document.</p>
                     </div>
+                    <div>
+                        <h6><i class="fas fa-align-left me-2"></i>Description</h6>
+                        <p class="text-muted small">Une description claire aide les utilisateurs à comprendre l'usage de ce type.</p>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>
-                            {{ type is defined and type.id is defined ? 'Mettre à jour' : 'Créer' }}
-                        </button>
+            {% if type is defined and type.id is defined %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-history me-2"></i>Historique
+                        </h5>
                     </div>
-                {{ form_end(form) }}
-            {% else %}
-                <form method="post">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="name">Nom</label>
-                            <input type="text" name="name" id="name" class="form-control" value="{{ type.name ?? '' }}" required>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Création</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ type.createdAt|date('d/m/Y H:i') }}
+                                    </small>
+                                </div>
+                            </div>
+                            {% if type.updatedAt %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-info">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Dernière modification</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ type.updatedAt|date('d/m/Y H:i') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
-                        <div class="col-md-6">
-                            <label for="code">Code</label>
-                            <input type="text" name="code" id="code" class="form-control" value="{{ type.code ?? '' }}" required>
-                        </div>
                     </div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <label for="description">Description</label>
-                            <textarea name="description" id="description" class="form-control">{{ type.description ?? '' }}</textarea>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>
-                            {{ type is defined and type.id is defined ? 'Mettre à jour' : 'Créer' }}
-                        </button>
-                    </div>
-                </form>
+                </div>
             {% endif %}
         </div>
     </div>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+.timeline {
+    position: relative;
+    padding: 0;
+    list-style: none;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    width: 2px;
+    background: var(--bs-gray-200);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 50px;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 15px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-marker i {
+    font-size: 8px;
+}
+
+.timeline-content {
+    padding: 10px 0;
+}
+</style>
 {% endblock %}

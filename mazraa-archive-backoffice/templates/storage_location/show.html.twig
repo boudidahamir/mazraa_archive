@@ -1,62 +1,401 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails de l'emplacement{% endblock %}
+{% block title %}Détails de l'emplacement - Mazraa Archive{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{{ path('app_storage_locations_index') }}">Emplacements</a>
+    </li>
+    <li class="breadcrumb-item active">Détails</li>
+{% endblock %}
 
 {% block body %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Détails de l'emplacement</h1>
-        <div>
+        <h1 class="page-title">
+            <i class="fas fa-warehouse me-2"></i>Détails de l'emplacement
+            <small class="text-muted fs-6 ms-2">#{{ storageLocation.id }}</small>
+        </h1>
+        <div class="btn-group">
             <a href="{{ path('app_storage_locations_edit', {'id': storageLocation.id}) }}" class="btn btn-warning">
-                <i class="fas fa-edit"></i> Modifier
+                <i class="fas fa-edit me-2"></i>Modifier
             </a>
-            <a href="{{ path('app_storage_locations_index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Retour à la liste
+            <a href="{{ path('app_storage_locations_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
             </a>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <table class="table">
-                <tbody>
-                    <tr>
-                        <th>Nom</th>
-                        <td>{{ storageLocation.name ?? 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Description</th>
-                        <td>{{ storageLocation.description ?: 'Aucune' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Chemin</th>
-                        <td>{{ storageLocation.path ?? 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Statut</th>
-                        <td>
-                            <span class="badge {{ storageLocation.isActive ? 'bg-success' : 'bg-danger' }}">
-                                {{ storageLocation.isActive ? 'Actif' : 'Inactif' }}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations de l'emplacement
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless mb-0">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 200px;">
+                                        <i class="fas fa-tag me-2"></i>Nom
+                                    </th>
+                                    <td>{{ storageLocation.name ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-hashtag me-2"></i>Code
+                                    </th>
+                                    <td>{{ storageLocation.code ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-layer-group me-2"></i>Étagère
+                                    </th>
+                                    <td>{{ storageLocation.shelf ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-grip-lines me-2"></i>Rangée
+                                    </th>
+                                    <td>{{ storageLocation.row ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-cube me-2"></i>Boîte
+                                    </th>
+                                    <td>{{ storageLocation.box ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-box me-2"></i>Capacité
+                                    </th>
+                                    <td>{{ storageLocation.capacity ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-align-left me-2"></i>Description
+                                    </th>
+                                    <td>{{ storageLocation.description ?: 'Aucune description' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-toggle-on me-2"></i>Statut
+                                    </th>
+                                    <td>
+                                        <span class="badge {{ storageLocation.isActive ? 'bg-success' : 'bg-danger' }}">
+                                            <i class="fas fa-{{ storageLocation.isActive ? 'check' : 'times' }} me-1"></i>
+                                            {{ storageLocation.isActive ? 'Actif' : 'Inactif' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-calendar-alt me-2"></i>Date de création
+                                    </th>
+                                    <td>{{ storageLocation.createdAt|date('d/m/Y H:i') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-calendar-check me-2"></i>Dernière modification
+                                    </th>
+                                    <td>{{ storageLocation.updatedAt|date('d/m/Y H:i') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {% if documents|length > 0 %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-alt me-2"></i>Documents stockés
+                            <span class="badge bg-primary ms-2">{{ documents|length }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Titre</th>
+                                        <th>Type</th>
+                                        <th>Statut</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for document in documents %}
+                                        <tr>
+                                            <td>
+                                                {% if document.barcode %}
+                                                    <small class="text-muted d-block">{{ document.barcode }}</small>
+                                                {% endif %}
+                                                {{ document.title }}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-tag me-1"></i>
+                                                    {{ document.documentTypeName }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% set statusColor = {
+                                                    'ACTIVE': 'success',
+                                                    'ARCHIVED': 'warning',
+                                                    'RETRIEVED': 'info',
+                                                    'DESTROYED': 'danger'
+                                                } %}
+                                                <span class="badge bg-{{ statusColor[document.status] }}">
+                                                    <i class="fas fa-circle me-1"></i>
+                                                    {{ document.status|capitalize }}
+                                                </span>
+                                            </td>
+                                            <td>{{ document.createdAt|date('d/m/Y') }}</td>
+                                            <td>
+                                                <a href="{{ path('app_documents_show', {'id': document.id}) }}" 
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   data-bs-toggle="tooltip"
+                                                   data-bs-placement="top"
+                                                   title="Voir les détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Utilisation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% set usagePercent = storageLocation.capacity > 0 ? (storageLocation.usedSpace / storageLocation.capacity * 100)|round : 0 %}
+                    <div class="text-center mb-4">
+                        <div class="progress-circle mx-auto" data-value="{{ usagePercent }}">
+                            <span class="progress-circle-left">
+                                <span class="progress-circle-bar border-{{ usagePercent >= 90 ? 'danger' : (usagePercent >= 70 ? 'warning' : 'success') }}"></span>
                             </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Date de création</th>
-                        <td>
-                            {{ storageLocation.createdAt is not null
-                                ? storageLocation.createdAt|date('d/m/Y H:i')
-                                : 'Non renseignée' }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Dernière modification</th>
-                        <td>
-                            {{ storageLocation.updatedAt is not null
-                                ? storageLocation.updatedAt|date('d/m/Y H:i')
-                                : 'Non modifié' }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <span class="progress-circle-right">
+                                <span class="progress-circle-bar border-{{ usagePercent >= 90 ? 'danger' : (usagePercent >= 70 ? 'warning' : 'success') }}"></span>
+                            </span>
+                            <div class="progress-circle-value">
+                                <div>
+                                    <span class="h2 mb-0">{{ usagePercent }}%</span><br>
+                                    <span class="small text-muted">utilisé</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3 class="mb-1">{{ storageLocation.usedSpace }}</h3>
+                            <small class="text-muted">Documents stockés</small>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="mb-1">{{ storageLocation.capacity - storageLocation.usedSpace }}</h3>
+                            <small class="text-muted">Places disponibles</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Historique
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Création</h6>
+                                <p class="timeline-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ storageLocation.createdAt|date('d/m/Y H:i') }}
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                        {% if storageLocation.updatedAt != storageLocation.createdAt %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Dernière modification</h6>
+                                    <p class="timeline-text">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ storageLocation.updatedAt|date('d/m/Y H:i') }}
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                        Confirmation de suppression
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cet emplacement ?</p>
+                    <p class="text-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Cette action est irréversible.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <form method="post" action="{{ path('app_storage_locations_delete', {'id': storageLocation.id}) }}" style="display: inline-block">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ storageLocation.id) }}">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+.progress-circle {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+}
+
+.progress-circle-bar {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: none;
+    border-width: 12px;
+    border-style: solid;
+    border-color: #dee2e6;
+    border-radius: 50%;
+}
+
+.progress-circle-left, .progress-circle-right {
+    position: absolute;
+    height: 100%;
+    width: 50%;
+    top: 0;
+    overflow: hidden;
+}
+
+.progress-circle-left { left: 0; }
+.progress-circle-right { right: 0; }
+
+.progress-circle-value {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: white;
+}
+
+.timeline {
+    position: relative;
+    padding: 0;
+    list-style: none;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 18px;
+    height: 100%;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 45px;
+    padding-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 15px;
+    top: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.timeline-content {
+    padding-top: 0;
+}
+
+.timeline-title {
+    margin: 0;
+    font-weight: 600;
+}
+
+.timeline-text {
+    margin: 0;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize progress circles
+    document.querySelectorAll('.progress-circle').forEach(function(circle) {
+        var value = circle.getAttribute('data-value');
+        var leftTransform = 'rotate(' + Math.min(value * 3.6, 180) + 'deg)';
+        var rightTransform = 'rotate(' + Math.max(value * 3.6 - 180, 0) + 'deg)';
+        
+        circle.querySelector('.progress-circle-left .progress-circle-bar').style.transform = leftTransform;
+        circle.querySelector('.progress-circle-right .progress-circle-bar').style.transform = rightTransform;
+    });
+});
+</script>
 {% endblock %}

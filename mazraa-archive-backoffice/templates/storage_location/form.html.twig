@@ -1,51 +1,359 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ storageLocation.id ? 'Modifier' : 'Nouvel' }} emplacement{% endblock %}
+{% block title %}
+    {{ storageLocation.id ? 'Modifier l\'emplacement' : 'Nouvel emplacement' }} - Mazraa Archive
+{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{{ path('app_storage_locations_index') }}">Emplacements</a>
+    </li>
+    <li class="breadcrumb-item active">
+        {{ storageLocation.id ? 'Modifier' : 'Nouveau' }}
+    </li>
+{% endblock %}
 
 {% block body %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>{{ storageLocation.id ? 'Modifier' : 'Nouvel' }} emplacement</h1>
-        <a href="{{ path('app_storage_locations_index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Retour à la liste
+        <h1 class="page-title">
+            <i class="fas fa-{{ storageLocation.id ? 'edit' : 'plus-circle' }} me-2"></i>
+            {{ storageLocation.id ? 'Modifier l\'emplacement' : 'Nouvel emplacement' }}
+            {% if storageLocation.id %}
+                <small class="text-muted fs-6 ms-2">#{{ storageLocation.id }}</small>
+            {% endif %}
+        </h1>
+        <a href="{{ path('app_storage_locations_index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
         </a>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            {{ form_start(form) }}
-                <div class="row">
-                    <div class="col-md-4">
-                        {{ form_row(form.name) }}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations de l'emplacement
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.name) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-tag"></i>
+                                        </span>
+                                        {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.name) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Nom descriptif de l'emplacement
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.code) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-hashtag"></i>
+                                        </span>
+                                        {{ form_widget(form.code, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.code) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Code unique pour identifier l'emplacement
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.capacity) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-box"></i>
+                                        </span>
+                                        {{ form_widget(form.capacity, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.capacity) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Nombre maximum de documents
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.shelf) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-layer-group"></i>
+                                        </span>
+                                        {{ form_widget(form.shelf, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.shelf) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Numéro ou identifiant de l'étagère
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.row) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-grip-lines"></i>
+                                        </span>
+                                        {{ form_widget(form.row, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.row) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Numéro de rangée dans l'étagère
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.box) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-cube"></i>
+                                        </span>
+                                        {{ form_widget(form.box, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.box) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Numéro de boîte ou compartiment
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    {{ form_label(form.description) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-align-left"></i>
+                                        </span>
+                                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '3'}}) }}
+                                    </div>
+                                    {{ form_errors(form.description) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Description détaillée de l'emplacement
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form_widget(form.active, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(form.active, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Indique si l'emplacement est actuellement utilisable
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-{{ storageLocation.id ? 'save' : 'plus-circle' }} me-2"></i>
+                                {{ storageLocation.id ? 'Mettre à jour' : 'Créer l\'emplacement' }}
+                            </button>
+                            {% if storageLocation.id %}
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="fas fa-trash me-2"></i>Supprimer
+                                </button>
+                            {% endif %}
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Utilisation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if storageLocation.id %}
+                        {% set usagePercent = storageLocation.capacity > 0 ? (storageLocation.usedSpace / storageLocation.capacity * 100)|round : 0 %}
+                        <div class="text-center mb-4">
+                            <div class="progress-circle mx-auto" data-value="{{ usagePercent }}">
+                                <span class="progress-circle-left">
+                                    <span class="progress-circle-bar border-{{ usagePercent >= 90 ? 'danger' : (usagePercent >= 70 ? 'warning' : 'success') }}"></span>
+                                </span>
+                                <span class="progress-circle-right">
+                                    <span class="progress-circle-bar border-{{ usagePercent >= 90 ? 'danger' : (usagePercent >= 70 ? 'warning' : 'success') }}"></span>
+                                </span>
+                                <div class="progress-circle-value">
+                                    <div>
+                                        <span class="h2 mb-0">{{ usagePercent }}%</span><br>
+                                        <span class="small text-muted">utilisé</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h3 class="mb-1">{{ storageLocation.usedSpace }}</h3>
+                                <small class="text-muted">Documents stockés</small>
+                            </div>
+                            <div class="col-6">
+                                <h3 class="mb-1">{{ storageLocation.capacity - storageLocation.usedSpace }}</h3>
+                                <small class="text-muted">Places disponibles</small>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Les statistiques seront disponibles après la création
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Aide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-tag me-2"></i>Nom</h6>
+                        <p class="text-muted small">Le nom doit être descriptif pour faciliter l'identification.</p>
                     </div>
-                    <div class="col-md-4">
-                        {{ form_row(form.code) }}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-hashtag me-2"></i>Code</h6>
+                        <p class="text-muted small">Le code doit être unique et suivre le format établi.</p>
                     </div>
-                    <div class="col-md-4">
-                        {{ form_row(form.capacity) }}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-box me-2"></i>Capacité</h6>
+                        <p class="text-muted small">Nombre maximum de documents que peut contenir l'emplacement.</p>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-map-marker-alt me-2"></i>Localisation</h6>
+                        <p class="text-muted small">Utilisez les champs étagère, rangée et boîte pour une localisation précise.</p>
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-4">
-                        {{ form_row(form.shelf) }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form_row(form.row) }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form_row(form.box) }}
-                    </div>
-                </div>
-
-                {{ form_row(form.description) }}
-                {{ form_row(form.active) }}
-
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> {{ storageLocation.id ? 'Mettre à jour' : 'Créer' }}
-                    </button>
-                </div>
-            {{ form_end(form) }}
+            </div>
         </div>
     </div>
+
+    {% if storageLocation.id %}
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                            Confirmation de suppression
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Êtes-vous sûr de vouloir supprimer cet emplacement ?</p>
+                        <p class="text-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Cette action est irréversible.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </button>
+                        <form method="post" action="{{ path('app_storage_locations_delete', {'id': storageLocation.id}) }}" style="display: inline-block">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ storageLocation.id) }}">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+.progress-circle {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+}
+
+.progress-circle-bar {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: none;
+    border-width: 12px;
+    border-style: solid;
+    border-color: #dee2e6;
+    border-radius: 50%;
+}
+
+.progress-circle-left, .progress-circle-right {
+    position: absolute;
+    height: 100%;
+    width: 50%;
+    top: 0;
+    overflow: hidden;
+}
+
+.progress-circle-left { left: 0; }
+.progress-circle-right { right: 0; }
+
+.progress-circle-value {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: white;
+}
+
+/* Add this JavaScript at the bottom of the template */
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize progress circles
+    document.querySelectorAll('.progress-circle').forEach(function(circle) {
+        var value = circle.getAttribute('data-value');
+        var leftTransform = 'rotate(' + Math.min(value * 3.6, 180) + 'deg)';
+        var rightTransform = 'rotate(' + Math.max(value * 3.6 - 180, 0) + 'deg)';
+        
+        circle.querySelector('.progress-circle-left .progress-circle-bar').style.transform = leftTransform;
+        circle.querySelector('.progress-circle-right .progress-circle-bar').style.transform = rightTransform;
+    });
+});
+</script>
 {% endblock %}

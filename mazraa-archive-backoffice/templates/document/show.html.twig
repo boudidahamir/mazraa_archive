@@ -1,77 +1,314 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails du document{% endblock %}
+{% block title %}Détails du document - Mazraa Archive{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{{ path('app_documents_index') }}">Documents</a>
+    </li>
+    <li class="breadcrumb-item active">Détails</li>
+{% endblock %}
 
 {% block body %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Détails du document</h1>
-        <div>
-            <a href="{{ path('app_documents_edit', {'id': document.id}) }}" class="btn btn-warning">
-                <i class="fas fa-edit"></i> Modifier
+        <h1 class="page-title">
+            <i class="fas fa-file-alt me-2"></i>Détails du document
+            <small class="text-muted fs-6 ms-2">#{{ document.id }}</small>
+        </h1>
+        <div class="btn-group">
+            <a href="{{ path('app_documents_edit', {'id': document.id}) }}" 
+               class="btn btn-warning"
+               data-bs-toggle="tooltip"
+               data-bs-placement="top"
+               title="Modifier ce document">
+                <i class="fas fa-edit me-2"></i>Modifier
             </a>
-            <a href="{{ path('app_documents_index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Retour à la liste
+            <a href="{{ path('app_documents_index') }}" 
+               class="btn btn-outline-secondary"
+               data-bs-toggle="tooltip"
+               data-bs-placement="top"
+               title="Retourner à la liste">
+                <i class="fas fa-arrow-left me-2"></i>Retour
             </a>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <table class="table">
-                <tbody>
-                    <tr>
-                        <th>Code</th>
-                        <td>{{ document.barcode }}</td>
-                    </tr>
-                    <tr>
-                        <th>Titre</th>
-                        <td>{{ document.title }}</td>
-                    </tr>
-                    <tr>
-                        <th>Type</th>
-                        <td>{{ document.documentTypeName  }}</td>
-                    </tr>
-                    <tr>
-                        <th>Description</th>
-                        <td>{{ document.description }}</td>
-                    </tr>
-                    <tr>
-                        <th>Statut</th>
-                        <td>
-                            {% if document.status == 'ACTIVE' %}
-                <span class="badge bg-success">Actif</span>
-            {% elseif document.status == 'ARCHIVED' %}
-                <span class="badge bg-warning">Archivé</span>
-            {% elseif document.status == 'RETRIEVED' %}
-                <span class="badge bg-info">Retiré</span>
-            {% elseif document.status == 'DESTROYED' %}
-                <span class="badge bg-danger">Détruit</span>
-            {% else %}
-                <span class="badge bg-secondary">Inconnu</span>
-            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Emplacement</th>
-                        <td>
-                            {% if document.storageLocationCode %}
-    {{ document.storageLocationCode }}
-{% else %}
-    <span class="text-muted">Non assigné</span>
-{% endif %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations du document
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-barcode fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">Code</h6>
+                                    {% if document.barcode %}
+                                        <div class="d-flex align-items-center">
+                                            <svg class="barcode me-2"
+                                                 jsbarcode-format="code128"
+                                                 jsbarcode-value="{{ document.barcode }}"
+                                                 jsbarcode-width="1.5"
+                                                 jsbarcode-height="50"
+                                                 jsbarcode-fontSize="12">
+                                            </svg>
+                                        </div>
+                                        <small class="text-muted">{{ document.barcode }}</small>
+                                    {% else %}
+                                        <p class="mb-0 text-muted">Non défini</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-heading fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">Titre</h6>
+                                    <p class="mb-0 h5">{{ document.title }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-tags fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">Type</h6>
+                                    <p class="mb-0 h5">{{ document.documentTypeName }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-warehouse fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">Emplacement</h6>
+                                    <p class="mb-0 h5">
+                                        {% if document.storageLocationCode %}
+                                            {{ document.storageLocationCode }}
+                                        {% else %}
+                                            <span class="text-muted">Non assigné</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-align-left fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">Description</h6>
+                                    <p class="mb-0">{{ document.description|default('Aucune description') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Date de création</th>
-                        <td>{{ document.createdAt ? document.createdAt|date('d/m/Y H:i') : 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Dernière modification</th>
-                        <td>{{ document.updatedAt ? document.updatedAt|date('d/m/Y H:i') : 'N/A' }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-flag me-2"></i>Statut
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        {% set statusInfo = {
+                            'ACTIVE': {class: 'success', icon: 'check-circle', text: 'Actif'},
+                            'ARCHIVED': {class: 'warning', icon: 'archive', text: 'Archivé'},
+                            'RETRIEVED': {class: 'info', icon: 'box-open', text: 'Retiré'},
+                            'DESTROYED': {class: 'danger', icon: 'trash-alt', text: 'Détruit'}
+                        } %}
+                        {% set info = statusInfo[document.status]|default({class: 'secondary', icon: 'question-circle', text: 'Inconnu'}) %}
+                        
+                        <div class="mb-3">
+                            <span class="fa-stack fa-2x">
+                                <i class="fas fa-circle fa-stack-2x text-{{ info.class }}"></i>
+                                <i class="fas fa-{{ info.icon }} fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </div>
+                        <h3 class="mb-3">{{ info.text }}</h3>
+                        <span class="badge bg-{{ info.class }} px-3 py-2">
+                            <i class="fas fa-{{ info.icon }} me-1"></i>{{ document.status }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Historique des modifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Création</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ document.createdAt ? document.createdAt|date('d/m/Y H:i') : 'N/A' }}
+                                </small>
+                            </div>
+                        </div>
+                        {% if document.updatedAt %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Dernière modification</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ document.updatedAt|date('d/m/Y H:i') }}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cog me-2"></i>Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('app_documents_print', {'id': document.id}) }}" 
+                           class="btn btn-outline-primary"
+                           target="_blank">
+                            <i class="fas fa-print me-2"></i>Imprimer
+                        </a>
+                        <a href="{{ path('app_documents_export_pdf', {'id': document.id}) }}" 
+                           class="btn btn-outline-info"
+                           target="_blank">
+                            <i class="fas fa-file-pdf me-2"></i>Exporter en PDF
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-2"></i>Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                        Confirmation de suppression
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer ce document ?</p>
+                    <p class="text-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Cette action est irréversible.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <form method="post" action="{{ path('app_documents_delete', {'id': document.id}) }}" style="display: inline-block">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+.timeline {
+    position: relative;
+    padding: 0;
+    list-style: none;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    width: 2px;
+    background: var(--bs-gray-200);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 50px;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 15px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-marker i {
+    font-size: 8px;
+}
+
+.timeline-content {
+    padding: 10px 0;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize barcode
+    JsBarcode(".barcode").init();
+});
+</script>
 {% endblock %} 

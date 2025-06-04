@@ -14,17 +14,27 @@ class DocumentFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title', TextType::class, ['label' => 'Titre'])
+            ->add('title', TextType::class, [
+                'label' => 'Titre',
+                'required' => true
+            ])
             ->add('documentType', ChoiceType::class, [
                 'label' => 'Type de document',
                 'choices' => $options['document_type_choices'],
-                'placeholder' => 'Sélectionnez un type'
+                'placeholder' => 'Sélectionnez un type',
+                'required' => true
             ])
-            ->add('barcode', TextType::class, ['label' => 'Code-barres'])
+            ->add('barcode', TextType::class, [
+                'label' => 'Code-barres',
+                'required' => false,
+                'help' => 'Optionnel - Peut être ajouté ultérieurement'
+            ])
             ->add('storageLocation', ChoiceType::class, [
                 'label' => 'Emplacement de stockage',
                 'choices' => $options['storage_location_choices'],
-                'placeholder' => 'Sélectionnez un emplacement'
+                'placeholder' => 'Sélectionnez un emplacement',
+                'required' => false,
+                'help' => 'Optionnel - Peut être assigné ultérieurement'
             ])
             ->add('status', ChoiceType::class, [
                 'label' => 'Statut',
@@ -33,7 +43,8 @@ class DocumentFormType extends AbstractType
                     'Archivé' => 'ARCHIVED',
                     'Retiré' => 'RETRIEVED',
                     'Détruit' => 'DESTROYED',
-                ]
+                ],
+                'required' => true
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',

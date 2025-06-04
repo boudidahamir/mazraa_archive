@@ -9,10 +9,12 @@ import com.mazraa.archive.service.DocumentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -66,9 +68,12 @@ public class DocumentController {
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<DocumentDTO>> searchDocuments(
-            @RequestParam String searchTerm,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(required = false) Long documentTypeId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             Pageable pageable) {
-        return ResponseEntity.ok(documentService.searchDocuments(searchTerm, pageable));
+        return ResponseEntity.ok(documentService.searchDocuments(searchTerm, documentTypeId, startDate, endDate, pageable));
     }
 
     @GetMapping("/type/{documentTypeId}")

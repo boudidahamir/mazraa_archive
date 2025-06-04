@@ -29,15 +29,14 @@ class UserProvider implements UserProviderInterface
             $user->setUsername($userData['username']);
             $user->setEmail($userData['email']);
             $user->setPassword($userData['password']);
-            if (isset($userData['roles'])) {
-                $user->setRoles($userData['roles']);
-            } elseif (isset($userData['role'])) {
-                $role = strtoupper($userData['role']);
-                $user->setRoles(['ROLE_' . $role]);
+            
+            // Handle role
+            if (isset($userData['role'])) {
+                $user->setRole($userData['role']);
             }
+            
             $user->setFullName($userData['fullname'] ?? ''); // fallback
             $user->setenabled($userData['enabled'] ?? true); // use "enabled" instead of "isActive"
-
 
             if (isset($userData['createdAt'])) {
                 $user->setCreatedAt(new \DateTimeImmutable($userData['createdAt']));

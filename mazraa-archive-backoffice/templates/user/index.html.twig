@@ -1,85 +1,310 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Gestion des utilisateurs - Mazraa Archive{% endblock %}
+{% block title %}Utilisateurs - Mazraa Archive{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active">Utilisateurs</li>
+{% endblock %}
 
 {% block body %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Gestion des utilisateurs</h1>
+        <h1 class="page-title">
+            <i class="fas fa-users me-2"></i>Utilisateurs
+            <small class="text-muted fs-6 ms-2">{{ totalUsers }} utilisateurs trouvés</small>
+        </h1>
         <a href="{{ path('user_new') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>
-            Nouvel utilisateur
+            <i class="fas fa-user-plus me-2"></i>Nouvel utilisateur
         </a>
     </div>
 
-    <div class="card">
+    <div class="row mb-4">
+        <!-- Total Users -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Total utilisateurs</h6>
+                            <h2 class="card-title mb-0 display-6">{{ totalUsers }}</h2>
+                            <small class="text-success">
+                                <i class="fas fa-user-check me-1"></i>Comptes actifs
+                            </small>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Users -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Utilisateurs connectés</h6>
+                            <h2 class="card-title mb-0 display-6">{{ activeUsers }}</h2>
+                            <small class="text-info">
+                                <i class="fas fa-signal me-1"></i>En ligne
+                            </small>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-user-clock fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Users -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Administrateurs</h6>
+                            <h2 class="card-title mb-0 display-6">{{ adminUsers }}</h2>
+                            <small class="text-warning">
+                                <i class="fas fa-shield-alt me-1"></i>Accès privilégié
+                            </small>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-user-shield fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inactive Users -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Utilisateurs inactifs</h6>
+                            <h2 class="card-title mb-0 display-6">{{ inactiveUsers }}</h2>
+                            <small class="text-danger">
+                                <i class="fas fa-user-slash me-1"></i>Comptes désactivés
+                            </small>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-user-times fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-search me-2"></i>Filtres de recherche
+            </h5>
+        </div>
         <div class="card-body">
+            <form method="get" action="{{ path('user_index') }}" class="row g-3" id="searchForm">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="search" class="form-label">
+                            <i class="fas fa-search me-1"></i>Rechercher
+                        </label>
+                        <input type="text" 
+                               id="search" 
+                               name="search" 
+                               class="form-control" 
+                               value="{{ search|default('') }}" 
+                               placeholder="Nom, email...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="role" class="form-label">
+                            <i class="fas fa-user-tag me-1"></i>Rôle
+                        </label>
+                        <select id="role" name="role" class="form-select">
+                            <option value="">Tous les rôles</option>
+                            <option value="{{ constant('App\\Model\\User::ROLE_ADMIN') }}" {% if role == constant('App\\Model\\User::ROLE_ADMIN') %}selected{% endif %}>Administrateur</option>
+                            <option value="{{ constant('App\\Model\\User::ROLE_USER') }}" {% if role == constant('App\\Model\\User::ROLE_USER') %}selected{% endif %}>Utilisateur</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="status" class="form-label">
+                            <i class="fas fa-toggle-on me-1"></i>Statut
+                        </label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="active" {% if status == 'active' %}selected{% endif %}>Actif</option>
+                            <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="d-flex gap-2 w-100">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="fas fa-search me-1"></i>Rechercher
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="resetFilters">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="dateRange" class="form-label">
+                            <i class="fas fa-calendar me-1"></i>Période d'inscription
+                        </label>
+                        <div class="input-group">
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="startDate" 
+                                   name="startDate" 
+                                   value="{{ startDate|default('') }}">
+                            <span class="input-group-text">à</span>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="endDate" 
+                                   name="endDate" 
+                                   value="{{ endDate|default('') }}">
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="sort" id="sortField" value="{{ sort|default('createdAt') }}">
+                <input type="hidden" name="direction" id="sortDirection" value="{{ direction|default('desc') }}">
+                <input type="hidden" name="page" id="page" value="{{ page|default(1) }}">
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>Nom d'utilisateur</th>
-                            <th>Email</th>
-                            <th>Nom complet</th>
-                            <th>Rôles</th>
+                            <th class="sortable" data-sort="fullName">
+                                <div class="d-flex align-items-center">
+                                    <span>Nom complet</span>
+                                    <i class="fas fa-sort{{ sort == 'fullName' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="email">
+                                <div class="d-flex align-items-center">
+                                    <span>Email</span>
+                                    <i class="fas fa-sort{{ sort == 'email' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="role">
+                                <div class="d-flex align-items-center">
+                                    <span>Rôle</span>
+                                    <i class="fas fa-sort{{ sort == 'role' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
                             <th>Statut</th>
-                            <th>Actions</th>
+                            <th class="sortable" data-sort="updatedAt">
+                                <div class="d-flex align-items-center">
+                                    <span>Dernière activité</span>
+                                    <i class="fas fa-sort{{ sort == 'updatedAt' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="createdAt">
+                                <div class="d-flex align-items-center">
+                                    <span>Date d'inscription</span>
+                                    <i class="fas fa-sort{{ sort == 'createdAt' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for user in users %}
                             <tr>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>{{ user.fullName }}</td>
                                 <td>
-                                    {% if user.role in ['ROLE_ADMIN', 'ADMIN'] %}
-                                        <span class="badge bg-danger">Admin</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user me-2 text-primary"></i>
+                                        {{ user.fullName }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <i class="fas fa-envelope me-1 text-muted"></i>
+                                    {{ user.email }}
+                                </td>
+                                <td>
+                                    {% if user.role == constant('App\\Model\\User::ROLE_ADMIN') %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-shield-alt me-1"></i>Administrateur
+                                        </span>
                                     {% else %}
-                                        <span class="badge bg-primary">User</span>
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-user me-1"></i>Utilisateur
+                                        </span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if user.enabled %}
-                                        <span class="badge bg-success">Actif</span>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Actif
+                                        </span>
                                     {% else %}
-                                        <span class="badge bg-danger">Inactif</span>
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle me-1"></i>Inactif
+                                        </span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div class="btn-group">
-                                        <a href="{{ path('user_edit', {'id': user.id}) }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-clock me-1 text-muted"></i>
+                                    {{ user.updatedAt ? user.updatedAt|date('d/m/Y H:i') : 'Jamais' }}
+                                </td>
+                                <td>
+                                    <i class="fas fa-calendar-alt me-1 text-muted"></i>
+                                    {{ user.createdAt|date('d/m/Y H:i') }}
+                                </td>
+                                <td>
+                                    <div class="btn-group float-end">
+                                        <a href="{{ path('user_show', {'id': user.id}) }}" 
+                                           class="btn btn-sm btn-info"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-placement="top"
+                                           title="Voir les détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('user_edit', {'id': user.id}) }}" 
+                                           class="btn btn-sm btn-warning"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-placement="top"
+                                           title="Modifier">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ user.id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-
-                                    <!-- Delete Modal -->
-                                    <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Confirmer la suppression</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    Êtes-vous sûr de vouloir supprimer l'utilisateur "{{ user.username }}" ?
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                                    <form action="{{ path('user_delete', {'id': user.id}) }}" method="post" class="d-inline">
-                                                        <button type="submit" class="btn btn-danger">Supprimer</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        {% if app.user.id != user.id %}
+                                            <form method="post" 
+                                                  action="{{ path('user_delete', {'id': user.id}) }}" 
+                                                  style="display: inline-block" 
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                                <button type="submit" 
+                                                        class="btn btn-sm btn-danger"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="top"
+                                                        title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="7" class="text-center">Aucun utilisateur trouvé</td>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>Aucun utilisateur trouvé
+                                    </div>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -87,4 +312,79 @@
             </div>
         </div>
     </div>
+
+    {% if totalPages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {{ page <= 1 ? 'disabled' : '' }}">
+                    <a class="page-link" href="#" data-page="{{ page - 1 }}" {{ page <= 1 ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                        <i class="fas fa-chevron-left me-1"></i>Précédent
+                    </a>
+                </li>
+                {% for i in 1..totalPages %}
+                    <li class="page-item {{ page == i ? 'active' : '' }}">
+                        <a class="page-link" href="#" data-page="{{ i }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {{ page >= totalPages ? 'disabled' : '' }}">
+                    <a class="page-link" href="#" data-page="{{ page + 1 }}" {{ page >= totalPages ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                        Suivant<i class="fas fa-chevron-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Sorting functionality
+    document.querySelectorAll('th.sortable').forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function() {
+            const sort = this.dataset.sort;
+            const currentSort = document.getElementById('sortField').value;
+            const currentDirection = document.getElementById('sortDirection').value;
+            
+            let newDirection = 'asc';
+            if (sort === currentSort && currentDirection === 'asc') {
+                newDirection = 'desc';
+            }
+            
+            document.getElementById('sortField').value = sort;
+            document.getElementById('sortDirection').value = newDirection;
+            document.getElementById('searchForm').submit();
+        });
+    });
+
+    // Pagination functionality
+    document.querySelectorAll('.pagination .page-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('page').value = this.dataset.page;
+            document.getElementById('searchForm').submit();
+        });
+    });
+
+    // Reset filters
+    document.getElementById('resetFilters').addEventListener('click', function() {
+        document.getElementById('search').value = '';
+        document.getElementById('role').value = '';
+        document.getElementById('status').value = '';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        document.getElementById('sortField').value = 'createdAt';
+        document.getElementById('sortDirection').value = 'desc';
+        document.getElementById('page').value = '1';
+        document.getElementById('searchForm').submit();
+    });
+});
+</script>
 {% endblock %} 

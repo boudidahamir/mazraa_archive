@@ -43,9 +43,20 @@ class SecurityController extends AbstractController
                 // Step 2: Decode JWT and extract roles
                 $payload = explode('.', $jwt)[1];
                 $decoded = json_decode(base64_decode($payload), true);
-                $roles = $decoded['roles'] ?? [];
-                error_log('[Decoded JWT] ' . print_r($decoded, true));
-                error_log("[Login] Extracted roles: " . json_encode($roles));
+                error_log('[Login] Full JWT payload: ' . print_r($decoded, true));
+                
+                // Check both possible role fields from JWT
+                $roles = [];
+                if (isset($decoded['roles'])) {
+                    $roles = is_array($decoded['roles']) ? $decoded['roles'] : [$decoded['roles']];
+                    error_log("[Login] Found roles in 'roles' claim: " . json_encode($roles));
+                }
+                if (isset($decoded['role'])) {
+                    $role = $decoded['role'];
+                    error_log("[Login] Found role in 'role' claim: " . $role);
+                    $roles = ['ROLE_' . strtoupper($role)];
+                }
+                error_log("[Login] Final roles array: " . json_encode($roles));
 
                 // Step 3: Store token
                 $session->set('jwt', $jwt);
@@ -53,17 +64,17 @@ class SecurityController extends AbstractController
 
                 // Step 4: Load user and inject roles
                 $user = $userProvider->loadUserByIdentifier($username);
-                if (method_exists($user, 'setRoles')) {
-                    $user->setRoles($roles);
-
-                    // Si tu veux, tu peux aussi définir le "rôle principal"
-                    if (in_array('ROLE_ADMIN', $roles)) {
-                        $user->setRole('ADMIN');
-                    } elseif (in_array('ROLE_USER', $roles)) {
-                        $user->setRole('USER');
-                    }
-
+                
+                // Set the role based on JWT roles
+                if (in_array('ROLE_ADMIN', $roles)) {
+                    $user->setRole('ADMIN');
+                    error_log("[Login] Setting user role to ADMIN");
+                } else {
+                    $user->setRole('USER');
+                    error_log("[Login] Setting user role to USER");
                 }
+
+                error_log("[Login] User roles after setting: " . json_encode($user->getRoles()));
 
                 // Step 5: Create Symfony security token
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());

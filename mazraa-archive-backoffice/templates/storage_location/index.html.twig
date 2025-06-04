@@ -1,65 +1,324 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Emplacements de stockage{% endblock %}
+{% block title %}Emplacements de stockage - Mazraa Archive{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active">Emplacements de stockage</li>
+{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Emplacements de stockage</h1>
-            <a href="{{ path('app_storage_locations_new') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Nouvel emplacement
-            </a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">
+            <i class="fas fa-warehouse me-2"></i>Emplacements de stockage
+            <small class="text-muted fs-6 ms-2">{{ totalLocations }} emplacements trouvés</small>
+        </h1>
+        <a href="{{ path('app_storage_locations_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>Nouvel emplacement
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Total Capacity -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Capacité totale</h6>
+                            <h2 class="card-title mb-0 display-6">{{ totalCapacity }}</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-box fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Nom</th>
-                        <th>Chemin</th>
-                        <th>Capacité</th>
-                        <th>Utilisé</th>
-                        <th>Actif</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for location in locations %}
-                        <tr>
-                            <td>{{ location.code }}</td>
-                            <td>{{ location.name }}</td>
-                            <td>{{ location.shelf }}/{{ location.row }}/{{ location.box }}</td>
-                            <td>{{ location.capacity }}</td>
-                            <td>{{ location.usedSpace ?? 0 }}</td>
-                            <td>
-                                {% if location.active %}
-                                    <span class="badge bg-success">Oui</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Non</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <a href="{{ path('app_storage_locations_edit', {'id': location.id}) }}" class="btn btn-sm btn-warning" title="Modifier">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form method="post" action="{{ path('app_storage_locations_delete', {'id': location.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ location.id) }}">
-                                        <button class="btn btn-sm btn-danger" title="Supprimer">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="7" class="text-center">Aucun emplacement trouvé</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- Used Space -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Espace utilisé</h6>
+                            <h2 class="card-title mb-0 display-6">{{ usedCapacity }}</h2>
+                            <small class="text-muted">
+                                <i class="fas fa-chart-line me-1"></i>{{ capacityUtilization }}% de la capacité
+                            </small>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-box-open fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Space -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Espace disponible</h6>
+                            <h2 class="card-title mb-0 display-6">{{ availableLocations }}</h2>
+                            <small class="text-success">
+                                <i class="fas fa-check-circle me-1"></i>{{ totalLocations > 0 ? (availableLocations / totalLocations * 100)|round : 0 }}% libre
+                            </small>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-cubes fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Near Full Locations -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Emplacements critiques</h6>
+                            <h2 class="card-title mb-0 display-6">{{ nearFullLocations }}</h2>
+                            <small class="text-danger">
+                                <i class="fas fa-exclamation-circle me-1"></i>Presque pleins
+                            </small>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-search me-2"></i>Filtres de recherche
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{{ path('app_storage_locations_index') }}" class="row g-3" id="searchForm">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="search" class="form-label">
+                            <i class="fas fa-search me-1"></i>Rechercher
+                        </label>
+                        <input type="text" 
+                               id="search" 
+                               name="search" 
+                               class="form-control" 
+                               value="{{ search|default('') }}" 
+                               placeholder="Nom, code...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="capacity" class="form-label">
+                            <i class="fas fa-chart-pie me-1"></i>Capacité
+                        </label>
+                        <select id="capacity" name="capacity" class="form-select">
+                            <option value="">Toutes les capacités</option>
+                            <option value="available" {% if capacity == 'available' %}selected{% endif %}>Disponible</option>
+                            <option value="full" {% if capacity == 'full' %}selected{% endif %}>Plein</option>
+                            <option value="nearFull" {% if capacity == 'nearFull' %}selected{% endif %}>Presque plein</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="dateRange" class="form-label">
+                            <i class="fas fa-calendar me-1"></i>Période de création
+                        </label>
+                        <div class="input-group">
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="startDate" 
+                                   name="startDate" 
+                                   value="{{ startDate|default('') }}">
+                            <span class="input-group-text">à</span>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="endDate" 
+                                   name="endDate" 
+                                   value="{{ endDate|default('') }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="d-flex gap-2 w-100">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="fas fa-search me-1"></i>Rechercher
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="resetFilters">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" name="sort" id="sortField" value="{{ sort|default('createdAt') }}">
+                <input type="hidden" name="direction" id="sortDirection" value="{{ direction|default('desc') }}">
+                <input type="hidden" name="page" id="page" value="{{ page|default(1) }}">
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="code">
+                                <div class="d-flex align-items-center">
+                                    <span>Code</span>
+                                    <i class="fas fa-sort{{ sort == 'code' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="name">
+                                <div class="d-flex align-items-center">
+                                    <span>Nom</span>
+                                    <i class="fas fa-sort{{ sort == 'name' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="capacity">
+                                <div class="d-flex align-items-center">
+                                    <span>Capacité</span>
+                                    <i class="fas fa-sort{{ sort == 'capacity' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="usedSpace">
+                                <div class="d-flex align-items-center">
+                                    <span>Utilisation</span>
+                                    <i class="fas fa-sort{{ sort == 'usedSpace' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="createdAt">
+                                <div class="d-flex align-items-center">
+                                    <span>Date de création</span>
+                                    <i class="fas fa-sort{{ sort == 'createdAt' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for location in locations %}
+                            <tr>
+                                <td>{{ location.code }}</td>
+                                <td>{{ location.name }}</td>
+                                <td>{{ location.capacity }}</td>
+                                <td>
+                                    {% set usagePercent = location.capacity > 0 ? (location.usedSpace / location.capacity * 100)|round : 0 %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                            <div class="progress-bar bg-{{ usagePercent >= 90 ? 'danger' : (usagePercent >= 70 ? 'warning' : 'success') }}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ usagePercent }}%" 
+                                                 aria-valuenow="{{ usagePercent }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ usagePercent }}%</small>
+                                    </div>
+                                </td>
+                                <td>{{ location.createdAt|date('d/m/Y') }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ path('app_storage_locations_show', {'id': location.id}) }}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Voir">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_storage_locations_edit', {'id': location.id}) }}" 
+                                           class="btn btn-sm btn-outline-warning" 
+                                           title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_storage_locations_delete', {'id': location.id}) }}" 
+                                              style="display: inline-block;"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ location.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-3">
+                                    <i class="fas fa-info-circle me-2"></i>Aucun emplacement trouvé
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if totalPages > 1 %}
+        <div class="d-flex justify-content-center mt-4">
+            <nav aria-label="Navigation des pages">
+                <ul class="pagination">
+                    <li class="page-item {{ page <= 1 ? 'disabled' : '' }}">
+                        <a class="page-link" href="{{ path('app_storage_locations_index', {page: page-1, search: search, capacity: capacity, sort: sort, direction: direction}) }}" aria-label="Précédent">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% for i in 1..totalPages %}
+                        <li class="page-item {{ page == i ? 'active' : '' }}">
+                            <a class="page-link" href="{{ path('app_storage_locations_index', {page: i, search: search, capacity: capacity, sort: sort, direction: direction}) }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    <li class="page-item {{ page >= totalPages ? 'disabled' : '' }}">
+                        <a class="page-link" href="{{ path('app_storage_locations_index', {page: page+1, search: search, capacity: capacity, sort: sort, direction: direction}) }}" aria-label="Suivant">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle sorting
+            document.querySelectorAll('.sortable').forEach(function(element) {
+                element.addEventListener('click', function() {
+                    const sort = this.dataset.sort;
+                    const currentSort = document.getElementById('sortField').value;
+                    const currentDirection = document.getElementById('sortDirection').value;
+                    
+                    document.getElementById('sortField').value = sort;
+                    document.getElementById('sortDirection').value = 
+                        sort === currentSort && currentDirection === 'asc' ? 'desc' : 'asc';
+                    
+                    document.getElementById('searchForm').submit();
+                });
+            });
+
+            // Handle filter reset
+            document.getElementById('resetFilters').addEventListener('click', function() {
+                document.getElementById('search').value = '';
+                document.getElementById('capacity').value = '';
+                document.getElementById('startDate').value = '';
+                document.getElementById('endDate').value = '';
+                document.getElementById('sortField').value = 'createdAt';
+                document.getElementById('sortDirection').value = 'desc';
+                document.getElementById('page').value = '1';
+                document.getElementById('searchForm').submit();
+            });
+        });
+    </script>
 {% endblock %}

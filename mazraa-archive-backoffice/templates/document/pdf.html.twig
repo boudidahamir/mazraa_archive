@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document #{{ document.id }} - Mazraa Archive</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+        .document-info {
+            margin-bottom: 30px;
+        }
+        .info-group {
+            margin-bottom: 20px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .info-value {
+            margin-top: 5px;
+        }
+        .barcode {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Document #{{ document.id }}</h1>
+        <p>Généré le {{ date|date('d/m/Y à H:i') }}</p>
+    </div>
+
+    <div class="document-info">
+        <div class="info-group">
+            <div class="info-label">Code</div>
+            <div class="info-value">{{ document.barcode }}</div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-label">Titre</div>
+            <div class="info-value">{{ document.title }}</div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-label">Type</div>
+            <div class="info-value">{{ document.documentTypeName }}</div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-label">Emplacement</div>
+            <div class="info-value">
+                {% if document.storageLocationCode %}
+                    {{ document.storageLocationCode }}
+                {% else %}
+                    Non assigné
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-label">Description</div>
+            <div class="info-value">{{ document.description|default('Aucune description') }}</div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-label">Statut</div>
+            <div class="info-value">{{ document.status }}</div>
+        </div>
+    </div>
+
+    <div class="barcode">
+        <div>Code-barres: {{ document.barcode }}</div>
+    </div>
+
+    <div class="footer">
+        <p>Mazraa Archive - Document confidentiel</p>
+        <p>Généré le {{ date|date('d/m/Y à H:i') }}</p>
+    </div>
+</body>
+</html> 

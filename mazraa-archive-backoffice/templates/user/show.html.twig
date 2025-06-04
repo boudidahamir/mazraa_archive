@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'utilisateur - Mazraa Archive{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{{ path('user_index') }}">Utilisateurs</a></li>
+    <li class="breadcrumb-item active">Détails de l'utilisateur</li>
+{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">
+            <i class="fas fa-user me-2"></i>Détails de l'utilisateur
+        </h1>
+        <div class="btn-group">
+            <a href="{{ path('user_edit', {'id': user.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Modifier
+            </a>
+            {% if app.user.id != user.id %}
+                <form method="post" action="{{ path('user_delete', {'id': user.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Supprimer
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations de base
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th style="width: 200px;">Nom complet</th>
+                                <td>{{ user.fullName }}</td>
+                            </tr>
+                            <tr>
+                                <th>Nom d'utilisateur</th>
+                                <td>{{ user.username }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>{{ user.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Rôle</th>
+                                <td>
+                                    {% if user.role == constant('App\\Model\\User::ROLE_ADMIN') %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-shield-alt me-1"></i>Administrateur
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-user me-1"></i>Utilisateur
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Statut</th>
+                                <td>
+                                    {% if user.enabled %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Actif
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle me-1"></i>Inactif
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Informations système
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th style="width: 200px;">Date de création</th>
+                                <td>
+                                    <i class="fas fa-calendar me-1 text-muted"></i>
+                                    {{ user.createdAt|date('d/m/Y H:i') }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Créé par</th>
+                                <td>
+                                    <i class="fas fa-user me-1 text-muted"></i>
+                                    {{ user.createdByName ?? 'Système' }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Dernière modification</th>
+                                <td>
+                                    <i class="fas fa-edit me-1 text-muted"></i>
+                                    {{ user.updatedAt|date('d/m/Y H:i') }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Modifié par</th>
+                                <td>
+                                    <i class="fas fa-user-edit me-1 text-muted"></i>
+                                    {{ user.updatedByName ?? 'Système' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('user_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+        </a>
+    </div>
+{% endblock %} 

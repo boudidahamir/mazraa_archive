@@ -2,53 +2,260 @@
 
 {% block title %}{{ title }} - Mazraa Archive{% endblock %}
 
+{% block breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{{ path('user_index') }}">Utilisateurs</a>
+    </li>
+    <li class="breadcrumb-item active">
+        {{ user is defined and user.id is defined ? 'Modifier' : 'Nouveau' }}
+    </li>
+{% endblock %}
+
 {% block body %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">{{ title }}</h1>
-        <a href="{{ path('user_index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>
-            Retour à la liste
+        <h1 class="page-title">
+            <i class="fas fa-{{ user is defined and user.id is defined ? 'edit' : 'plus-circle' }} me-2"></i>
+            {{ title }}
+            {% if user is defined and user.id is defined %}
+                <small class="text-muted fs-6 ms-2">#{{ user.id }}</small>
+            {% endif %}
+        </h1>
+        <a href="{{ path('user_index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
         </a>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            {{ form_start(form) }}
-                <div class="row">
-                    <div class="col-md-6">
-                        {{ form_row(form.username) }}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations de l'utilisateur
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.username) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                        {{ form_widget(form.username, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.username) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>Nom d'utilisateur unique
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.email) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.email) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>Adresse email professionnelle
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    {{ form_label(form.fullName) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-id-card"></i>
+                                        </span>
+                                        {{ form_widget(form.fullName, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.fullName) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>Nom complet de l'utilisateur
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.plainPassword) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.plainPassword) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>Minimum 8 caractères avec lettres et chiffres
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.role) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-user-shield"></i>
+                                        </span>
+                                        {{ form_widget(form.role, {'attr': {'class': 'form-select'}}) }}
+                                    </div>
+                                    {{ form_errors(form.role) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>Niveau d'accès de l'utilisateur
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form_widget(form.enabled, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(form.enabled, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-{{ user is defined and user.id is defined ? 'save' : 'plus-circle' }} me-2"></i>
+                                {{ user is defined and user.id is defined ? 'Mettre à jour' : 'Créer l\'utilisateur' }}
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Aide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-user me-2"></i>Nom d'utilisateur</h6>
+                        <p class="text-muted small">Identifiant unique utilisé pour la connexion.</p>
                     </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.email) }}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-envelope me-2"></i>Email</h6>
+                        <p class="text-muted small">Utilisé pour les notifications et la réinitialisation du mot de passe.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-lock me-2"></i>Mot de passe</h6>
+                        <p class="text-muted small">Doit être sécurisé et contenir au moins 8 caractères.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-user-shield me-2"></i>Rôle</h6>
+                        <p class="text-muted small">Détermine les permissions et l'accès aux fonctionnalités.</p>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-toggle-on me-2"></i>Statut</h6>
+                        <p class="text-muted small">Un utilisateur désactivé ne pourra pas se connecter au système.</p>
                     </div>
                 </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            {{ form_row(form.fullName) }}
+            </div>
+
+            {% if user is defined and user.id is defined %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-history me-2"></i>Historique
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Création</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ user.createdAt|date('d/m/Y H:i') }}
+                                        {% if user.createdByName %}
+                                            <br>
+                                            <i class="fas fa-user me-1"></i>
+                                            {{ user.createdByName }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            {% if user.updatedAt %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-info">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Dernière modification</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ user.updatedAt|date('d/m/Y H:i') }}
+                                            {% if user.updatedByName %}
+                                                <br>
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ user.updatedByName }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        {{ form_row(form.plainPassword) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.enabled) }}
-                    </div>
                 </div>
-
-                <div class="row">
-                    <div class="col-12">
-                        {{ form_row(form.role) }}
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>
-                        Enregistrer
-                    </button>
-                </div>
-            {{ form_end(form) }}
+            {% endif %}
         </div>
     </div>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+.timeline {
+    position: relative;
+    padding: 0;
+    list-style: none;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    width: 2px;
+    background: var(--bs-gray-200);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 50px;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 15px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-marker i {
+    font-size: 8px;
+}
+
+.timeline-content {
+    padding: 10px 0;
+}
+</style>
 {% endblock %} 

@@ -4,6 +4,7 @@ import com.mazraa.archive.dto.StorageLocationCreateRequest;
 import com.mazraa.archive.dto.StorageLocationDTO;
 import com.mazraa.archive.dto.StorageLocationUpdateRequest;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -15,7 +16,7 @@ public interface StorageLocationService {
     StorageLocationDTO getStorageLocation(Long id);
     StorageLocationDTO getStorageLocationByCode(String code);
     StorageLocationDTO getStorageLocationByLocation(String shelf, String row, String box);
-    Page<StorageLocationDTO> searchStorageLocations(String searchTerm, Pageable pageable);
+    Page<StorageLocationDTO> searchStorageLocations(String searchTerm, String capacityFilter, LocalDate startDate, LocalDate endDate, Pageable pageable);
     Page<StorageLocationDTO> getAvailableStorageLocations(Pageable pageable);
     void deleteStorageLocation(Long id);
     List<StorageLocationDTO> getAllStorageLocations();

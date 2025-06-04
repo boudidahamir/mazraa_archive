@@ -4,6 +4,7 @@ import com.mazraa.archive.dto.DocumentCreateRequest;
 import com.mazraa.archive.dto.DocumentDTO;
 import com.mazraa.archive.dto.DocumentUpdateRequest;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,7 @@ public interface DocumentService {
     DocumentDTO updateDocument(Long id, DocumentUpdateRequest request, Long userId);
     DocumentDTO getDocument(Long id);
     DocumentDTO getDocumentByBarcode(String barcode);
-    Page<DocumentDTO> searchDocuments(String searchTerm, Pageable pageable);
+    Page<DocumentDTO> searchDocuments(String searchTerm, Long documentTypeId, LocalDate startDate, LocalDate endDate, Pageable pageable);
     Page<DocumentDTO> getDocumentsByType(Long documentTypeId, Pageable pageable);
     Page<DocumentDTO> getDocumentsByLocation(Long storageLocationId, Pageable pageable);
     Page<DocumentDTO> getDocumentsByUser(Long userId, Pageable pageable);

@@ -1,0 +1,151 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Impression du document #{{ document.id }} - Mazraa Archive{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            .print-header {
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 20px;
+            }
+            .print-footer {
+                text-align: center;
+                margin-top: 50px;
+                font-size: 0.9em;
+                color: #666;
+                border-top: 1px solid #ddd;
+                padding-top: 20px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="no-print mb-4">
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="fas fa-print me-2"></i>Imprimer
+        </button>
+        <a href="{{ path('app_documents_show', {'id': document.id}) }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour
+        </a>
+    </div>
+
+    <div class="print-header">
+        <h1>Document #{{ document.id }}</h1>
+        <p>Imprimé le {{ date|date('d/m/Y à H:i') }}</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-barcode me-2"></i>Code
+                    </h5>
+                    <p class="card-text h4">{{ document.barcode }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-heading me-2"></i>Titre
+                    </h5>
+                    <p class="card-text h4">{{ document.title }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-tags me-2"></i>Type
+                    </h5>
+                    <p class="card-text h4">{{ document.documentTypeName }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-warehouse me-2"></i>Emplacement
+                    </h5>
+                    <p class="card-text h4">
+                        {% if document.storageLocationCode %}
+                            {{ document.storageLocationCode }}
+                        {% else %}
+                            <span class="text-muted">Non assigné</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-align-left me-2"></i>Description
+                    </h5>
+                    <p class="card-text">{{ document.description|default('Aucune description') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-flag me-2"></i>Statut
+                    </h5>
+                    <p class="card-text">
+                        {% set statusInfo = {
+                            'ACTIVE': {class: 'success', icon: 'check-circle', text: 'Actif'},
+                            'ARCHIVED': {class: 'warning', icon: 'archive', text: 'Archivé'},
+                            'RETRIEVED': {class: 'info', icon: 'box-open', text: 'Retiré'},
+                            'DESTROYED': {class: 'danger', icon: 'trash-alt', text: 'Détruit'}
+                        } %}
+                        {% set info = statusInfo[document.status]|default({class: 'secondary', icon: 'question-circle', text: 'Inconnu'}) %}
+                        <span class="badge bg-{{ info.class }} px-3 py-2">
+                            <i class="fas fa-{{ info.icon }} me-1"></i>{{ document.status }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="print-footer">
+        <p>Mazraa Archive - Document confidentiel</p>
+        <p>Imprimé le {{ date|date('d/m/Y à H:i') }}</p>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Automatically open print dialog when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Small delay to ensure the page is fully loaded
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        });
+    </script>
+{% endblock %} 

@@ -11,13 +11,17 @@ import com.mazraa.archive.repository.DocumentTypeRepository;
 import com.mazraa.archive.repository.UserRepository;
 import com.mazraa.archive.service.DocumentTypeService;
 import lombok.RequiredArgsConstructor;
-
-import java.time.LocalDateTime;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -104,9 +108,34 @@ public class DocumentTypeServiceImpl implements DocumentTypeService {
     }
 
     @Override
-    public Page<DocumentTypeDTO> searchDocumentTypes(String searchTerm, Pageable pageable) {
-        return documentTypeRepository.findAll(pageable)
-                .map(this::convertToDTO);
+    public Page<DocumentTypeDTO> searchDocumentTypes(String searchTerm, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Specification<DocumentType> spec = Specification.where(null);
+
+        // Add search term filter
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                String pattern = "%" + searchTerm.toLowerCase() + "%";
+                return cb.or(
+                    cb.like(cb.lower(root.get("name")), pattern),
+                    cb.like(cb.lower(root.get("code")), pattern),
+                    cb.like(cb.lower(root.get("description")), pattern)
+                );
+            });
+        }
+
+        // Add date range filter
+        if (startDate != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.greaterThanOrEqualTo(root.get("createdAt"), startDate.atStartOfDay())
+            );
+        }
+        if (endDate != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.lessThanOrEqualTo(root.get("createdAt"), endDate.atTime(LocalTime.MAX))
+            );
+        }
+
+        return documentTypeRepository.findAll(spec, pageable).map(this::convertToDTO);
     }
 
     @Override
@@ -115,6 +144,13 @@ public class DocumentTypeServiceImpl implements DocumentTypeService {
         DocumentType documentType = documentTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Document type not found"));
         documentTypeRepository.delete(documentType);
+    }
+
+    @Override
+    public List<DocumentTypeDTO> getAllDocumentTypes() {
+        return documentTypeRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     private DocumentTypeDTO convertToDTO(DocumentType documentType) {

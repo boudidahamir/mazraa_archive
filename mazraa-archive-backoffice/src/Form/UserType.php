@@ -21,7 +21,11 @@ class UserType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Entrez le nom d\'utilisateur',
+                    'pattern' => '^[a-zA-Z0-9_]+$',
+                    'minlength' => 3,
+                    'maxlength' => 50,
                 ],
+                'help' => 'Le nom d\'utilisateur doit contenir entre 3 et 50 caractères (lettres, chiffres et underscore uniquement).',
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
@@ -45,29 +49,32 @@ class UserType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => $options['is_edit'] ? 'Laissez vide pour ne pas modifier' : 'Entrez le mot de passe',
+                    'minlength' => 8,
                 ],
+                'help' => 'Le mot de passe doit contenir au moins 8 caractères.',
             ])
             ->add('role', ChoiceType::class, [
                 'label' => 'Rôle',
                 'choices' => [
-                    'Utilisateur' => 'USER',
-                    'Administrateur' => 'ADMIN',
+                    'Utilisateur' => User::ROLE_USER,
+                    'Administrateur' => User::ROLE_ADMIN,
                 ],
-                'expanded' => true, // boutons radio
+                'expanded' => false,
                 'multiple' => false,
-                'attr' => ['class' => 'form-check'],
+                'attr' => ['class' => 'form-select'],
             ])
             
             ->add('enabled', ChoiceType::class, [
-                'label' => 'Statut',
+                'label' => 'Compte actif',
                 'choices' => [
                     'Actif' => true,
                     'Inactif' => false,
                 ],
                 'expanded' => true,
-                'attr' => [
-                    'class' => 'form-check',
-                ],
+                'multiple' => false,
+                'data' => true,
+                'label_attr' => ['class' => 'form-check-label'],
+                'attr' => ['class' => 'form-check-input'],
             ])
             
         ;

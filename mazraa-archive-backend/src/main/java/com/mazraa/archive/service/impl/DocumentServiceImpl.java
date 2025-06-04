@@ -17,10 +17,13 @@ import com.mazraa.archive.service.DocumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,15 +39,21 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     @Transactional
     public DocumentDTO createDocument(DocumentCreateRequest request, Long userId) {
-        if (documentRepository.existsByBarcode(request.getBarcode())) {
+        // Only check barcode if it's provided
+        if (request.getBarcode() != null && !request.getBarcode().isEmpty() && 
+            documentRepository.existsByBarcode(request.getBarcode())) {
             throw new ResourceAlreadyExistsException("Document with barcode " + request.getBarcode() + " already exists");
         }
 
         DocumentType documentType = documentTypeRepository.findById(request.getDocumentTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Document type not found"));
 
-        StorageLocation storageLocation = storageLocationRepository.findById(request.getStorageLocationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Storage location not found"));
+        // Only fetch storage location if ID is provided
+        StorageLocation storageLocation = null;
+        if (request.getStorageLocationId() != null) {
+            storageLocation = storageLocationRepository.findById(request.getStorageLocationId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Storage location not found"));
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -71,8 +80,12 @@ public class DocumentServiceImpl implements DocumentService {
         DocumentType documentType = documentTypeRepository.findById(request.getDocumentTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Document type not found"));
 
-        StorageLocation storageLocation = storageLocationRepository.findById(request.getStorageLocationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Storage location not found"));
+        // Only fetch and set storage location if ID is provided
+        StorageLocation storageLocation = null;
+        if (request.getStorageLocationId() != null) {
+            storageLocation = storageLocationRepository.findById(request.getStorageLocationId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Storage location not found"));
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -85,17 +98,16 @@ public class DocumentServiceImpl implements DocumentService {
         document.setStatus(request.getStatus());
         document.setUpdatedBy(user);
 
-        if(request.getStatus() == "ARCHIVED"){
-            System.out.println("Document is archived");
+        if(request.getStatus().equals("ARCHIVED")){
             document.setArchived(true);
             document.setArchivedAt(LocalDateTime.now());
             document.setArchivedBy(user);
-        }
-        else{
+        } else {
             document.setArchived(false);
             document.setArchivedAt(null);
-            document.setArchivedBy(user);
+            document.setArchivedBy(null);
         }
+        
         return convertToDTO(documentRepository.save(document));
     }
 
@@ -114,9 +126,41 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Page<DocumentDTO> searchDocuments(String searchTerm, Pageable pageable) {
-        return documentRepository.searchDocuments(searchTerm, pageable)
-                .map(this::convertToDTO);
+    public Page<DocumentDTO> searchDocuments(String searchTerm, Long documentTypeId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Specification<Document> spec = Specification.where(null);
+
+        // Add search term filter
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                String pattern = "%" + searchTerm.toLowerCase() + "%";
+                return cb.or(
+                    cb.like(cb.lower(root.get("title")), pattern),
+                    cb.like(cb.lower(root.get("barcode")), pattern),
+                    cb.like(cb.lower(root.get("description")), pattern)
+                );
+            });
+        }
+
+        // Add document type filter
+        if (documentTypeId != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("documentType").get("id"), documentTypeId)
+            );
+        }
+
+        // Add date range filter
+        if (startDate != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.greaterThanOrEqualTo(root.get("createdAt"), startDate.atStartOfDay())
+            );
+        }
+        if (endDate != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.lessThanOrEqualTo(root.get("createdAt"), endDate.atTime(LocalTime.MAX))
+            );
+        }
+
+        return documentRepository.findAll(spec, pageable).map(this::convertToDTO);
     }
 
     @Override
@@ -179,24 +223,35 @@ public class DocumentServiceImpl implements DocumentService {
     private DocumentDTO convertToDTO(Document document) {
         DocumentDTO dto = new DocumentDTO();
         dto.setId(document.getId());
-        dto.setDocumentTypeId(document.getDocumentType().getId());
-        dto.setDocumentTypeName(document.getDocumentType().getName());
-        dto.setBarcode(document.getBarcode());
         dto.setTitle(document.getTitle());
+        dto.setBarcode(document.getBarcode());
         dto.setDescription(document.getDescription());
-        dto.setStorageLocationId(document.getStorageLocation().getId());
-        dto.setStorageLocationCode(document.getStorageLocation().getCode());
+        dto.setStatus(document.getStatus());
         dto.setArchived(document.isArchived());
-        dto.setArchivedAt(document.getArchivedAt());
         dto.setCreatedAt(document.getCreatedAt());
         dto.setUpdatedAt(document.getUpdatedAt());
-        dto.setCreatedById(document.getCreatedBy().getId());
-        dto.setCreatedByName(document.getCreatedBy().getFullName());
-        dto.setStatus(document.getStatus());
+        dto.setArchivedAt(document.getArchivedAt());
+
+        if (document.getDocumentType() != null) {
+            dto.setDocumentTypeId(document.getDocumentType().getId());
+            dto.setDocumentTypeName(document.getDocumentType().getName());
+        }
+
+        if (document.getStorageLocation() != null) {
+            dto.setStorageLocationId(document.getStorageLocation().getId());
+            dto.setStorageLocationCode(document.getStorageLocation().getCode());
+        }
+
+        if (document.getCreatedBy() != null) {
+            dto.setCreatedById(document.getCreatedBy().getId());
+            dto.setCreatedByName(document.getCreatedBy().getFullName());
+        }
+
         if (document.getUpdatedBy() != null) {
             dto.setUpdatedById(document.getUpdatedBy().getId());
             dto.setUpdatedByName(document.getUpdatedBy().getFullName());
         }
+
         if (document.getArchivedBy() != null) {
             dto.setArchivedById(document.getArchivedBy().getId());
             dto.setArchivedByName(document.getArchivedBy().getFullName());

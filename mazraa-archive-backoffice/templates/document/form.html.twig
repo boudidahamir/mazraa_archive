@@ -5,54 +5,358 @@
     {{ document.id ? 'Modifier le document' : 'Nouveau document' }} - Mazraa Archive
 {% endblock %}
 
+{% block breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{{ path('app_documents_index') }}">Documents</a>
+    </li>
+    <li class="breadcrumb-item active">
+        {{ document.id ? 'Modifier' : 'Nouveau' }}
+    </li>
+{% endblock %}
+
 {% block body %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">
+        <h1 class="page-title">
+            <i class="fas fa-{{ document.id ? 'edit' : 'plus-circle' }} me-2"></i>
             {{ document.id ? 'Modifier le document' : 'Nouveau document' }}
+            {% if document.id %}
+                <small class="text-muted fs-6 ms-2">#{{ document.id }}</small>
+            {% endif %}
         </h1>
-        <a href="{{ path('app_documents_index') }}" class="btn btn-secondary">
+        <a href="{{ path('app_documents_index') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-2"></i>
             Retour à la liste
         </a>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            {{ form_start(form) }}
-                <div class="row">
-                    <div class="col-md-6">
-                        {{ form_row(form.title) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.documentType) }}
-                    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations du document
+                    </h5>
                 </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.title) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-heading"></i>
+                                        </span>
+                                        {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(form.title) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Entrez un titre descriptif pour le document
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.documentType) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-tags"></i>
+                                        </span>
+                                        {{ form_widget(form.documentType, {'attr': {'class': 'form-select'}}) }}
+                                    </div>
+                                    {{ form_errors(form.documentType) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Sélectionnez le type de document
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.barcode) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-barcode"></i>
+                                        </span>
+                                        {{ form_widget(form.barcode, {'attr': {'class': 'form-control', 'data-barcode-input': 'true'}}) }}
+                                    </div>
+                                    {{ form_errors(form.barcode) }}
+                                    <div class="mt-2" id="barcodePreview">
+                                        {% if document.barcode %}
+                                            <svg class="barcode"
+                                                 jsbarcode-format="code128"
+                                                 jsbarcode-value="{{ document.barcode }}"
+                                                 jsbarcode-width="1"
+                                                 jsbarcode-height="30"
+                                                 jsbarcode-fontSize="12">
+                                            </svg>
+                                        {% endif %}
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Code-barres unique pour le document (optionnel)
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.storageLocation) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-warehouse"></i>
+                                        </span>
+                                        {{ form_widget(form.storageLocation, {'attr': {'class': 'form-select'}}) }}
+                                    </div>
+                                    {{ form_errors(form.storageLocation) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Emplacement physique du document
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.status) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-flag"></i>
+                                        </span>
+                                        {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+                                    </div>
+                                    {{ form_errors(form.status) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        État actuel du document
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.description) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-align-left"></i>
+                                        </span>
+                                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '3'}}) }}
+                                    </div>
+                                    {{ form_errors(form.description) }}
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Description détaillée du document
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        {{ form_row(form.barcode) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.storageLocation) }}
+                        <div class="mt-4 d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-{{ document.id ? 'save' : 'plus-circle' }} me-2"></i>
+                                {{ document.id ? 'Mettre à jour' : 'Créer le document' }}
+                            </button>
+                            {% if document.id %}
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="fas fa-trash me-2"></i>Supprimer
+                                </button>
+                            {% endif %}
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Historique
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% if document.id %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Création</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ document.createdAt|date('d/m/Y H:i') }}
+                                    </small>
+                                </div>
+                            </div>
+                            {% if document.updatedAt %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-info">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Dernière modification</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ document.updatedAt|date('d/m/Y H:i') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                L'historique sera disponible après la création
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
+            </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        {{ form_row(form.status) }}
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Aide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-info-circle me-2"></i>Titre</h6>
+                        <p class="text-muted small">Le titre doit être unique et descriptif pour faciliter la recherche.</p>
                     </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.description) }}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-barcode me-2"></i>Code-barres</h6>
+                        <p class="text-muted small">Le code-barres est utilisé pour le suivi physique du document.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-warehouse me-2"></i>Emplacement</h6>
+                        <p class="text-muted small">Sélectionnez l'emplacement où le document sera stocké physiquement.</p>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-flag me-2"></i>Statut</h6>
+                        <p class="text-muted small">Le statut indique l'état actuel du document dans le système.</p>
                     </div>
                 </div>
-
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>
-                        {{ document.id ? 'Mettre à jour' : 'Créer' }}
-                    </button>
-                </div>
-            {{ form_end(form) }}
+            </div>
         </div>
     </div>
+
+    {% if document.id %}
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                            Confirmation de suppression
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Êtes-vous sûr de vouloir supprimer ce document ?</p>
+                        <p class="text-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Cette action est irréversible.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </button>
+                        <form method="post" action="{{ path('app_documents_delete', {'id': document.id}) }}" style="display: inline-block">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+.timeline {
+    position: relative;
+    padding: 0;
+    list-style: none;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    width: 2px;
+    background: var(--bs-gray-200);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 50px;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 15px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-marker i {
+    font-size: 8px;
+}
+
+.timeline-content {
+    padding: 10px 0;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize barcode if it exists
+    JsBarcode(".barcode").init();
+
+    // Handle real-time barcode preview
+    const barcodeInput = document.querySelector('[data-barcode-input]');
+    const barcodePreview = document.getElementById('barcodePreview');
+
+    if (barcodeInput && barcodePreview) {
+        barcodeInput.addEventListener('input', function(e) {
+            const value = e.target.value.trim();
+            
+            // Clear previous preview
+            barcodePreview.innerHTML = '';
+            
+            if (value) {
+                // Create new barcode
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.classList.add('barcode');
+                svg.setAttribute('jsbarcode-format', 'code128');
+                svg.setAttribute('jsbarcode-value', value);
+                svg.setAttribute('jsbarcode-width', '1');
+                svg.setAttribute('jsbarcode-height', '30');
+                svg.setAttribute('jsbarcode-fontSize', '12');
+                
+                barcodePreview.appendChild(svg);
+                
+                try {
+                    JsBarcode(".barcode").init();
+                } catch (error) {
+                    console.error('Invalid barcode value');
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -17,7 +17,6 @@ class Document
     #[Assert\NotBlank]
     private ?string $status = 'ACTIVE';
 
-    #[Assert\NotBlank]
     private ?string $barcode = null;
 
     private ?string $description = null;
@@ -35,11 +34,15 @@ class Document
         $document = new self();
         $document->setId($data['id'] ?? null);
         $document->setTitle($data['title'] ?? '');
-        $document->setDocumentType($data['documentTypeName'] ?? 'Inconnu'); // <-- Correction ici
+        $document->setDocumentType(isset($data['documentType']) && isset($data['documentType']['id']) 
+            ? (string)$data['documentType']['id'] 
+            : null);
         $document->setStatus($data['status'] ?? 'ACTIVE');
-        $document->setBarcode($data['barcode'] ?? '');
-        $document->setDescription($data['description'] ?? '');
-        $document->setStorageLocation($data['storageLocationCode'] ?? ''); // idem ici si tu veux afficher le nom
+        $document->setBarcode($data['barcode'] ?? null);
+        $document->setDescription($data['description'] ?? null);
+        $document->setStorageLocation(isset($data['storageLocation']) && isset($data['storageLocation']['id']) 
+            ? (string)$data['storageLocation']['id'] 
+            : null);
     
         if (isset($data['createdAt'])) {
             $document->setCreatedAt(new \DateTimeImmutable($data['createdAt']));
@@ -59,11 +62,11 @@ class Document
     {
         return [
             'title' => $this->title,
-            'documentTypeId' => $this->documentType,
+            'documentTypeId' => $this->documentType ? (int)$this->documentType : null,
             'status' => $this->status,
-            'barcode' => $this->barcode,
             'description' => $this->description,
-            'storageLocationId' => $this->storageLocation,
+            'barcode' => $this->barcode,
+            'storageLocationId' => $this->storageLocation ? (int)$this->storageLocation : null
         ];
     }
 
@@ -96,7 +99,7 @@ class Document
         return $this->documentType;
     }
 
-    public function setDocumentType(string $documentType): self
+    public function setDocumentType(?string $documentType): self
     {
         $this->documentType = $documentType;
         return $this;
@@ -118,7 +121,7 @@ class Document
         return $this->barcode;
     }
 
-    public function setBarcode(string $barcode): self
+    public function setBarcode(?string $barcode): self
     {
         $this->barcode = $barcode;
         return $this;
@@ -194,8 +197,8 @@ class Document
     {
         return match ($this->status) {
             'ACTIVE' => 'success',
-            'ARCHIVED' => 'info',
-            'RETRIEVED' => 'warning',
+            'ARCHIVED' => 'warning',
+            'RETRIEVED' => 'info',
             'DESTROYED' => 'danger',
             default => 'secondary'
         };

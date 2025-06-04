@@ -77,22 +77,26 @@ class JwtAuthenticator extends AbstractAuthenticator
             }
 
             $username = $token->claims()->get('sub');
-            $roles = [];
+            $role = null;
             if ($token->claims()->has('roles')) {
                 $claim = $token->claims()->get('roles');
-                if (is_array($claim)) {
-                    $roles = $claim;
+                if (is_array($claim) && !empty($claim)) {
+                    // Take the highest role (ADMIN > USER)
+                    $role = in_array('ROLE_ADMIN', $claim) ? 'ADMIN' : 'USER';
                 } elseif (is_string($claim)) {
-                    $roles = json_decode($claim, true) ?? [];
+                    $decoded = json_decode($claim, true);
+                    if (is_array($decoded) && !empty($decoded)) {
+                        $role = in_array('ROLE_ADMIN', $decoded) ? 'ADMIN' : 'USER';
+                    }
                 }
             }
-            error_log("[Auth] Token roles: " . json_encode($roles));
+            error_log("[Auth] Token role: " . ($role ?? 'USER'));
 
             return new SelfValidatingPassport(
-                new UserBadge($username, function ($userIdentifier) use ($roles) {
+                new UserBadge($username, function ($userIdentifier) use ($role) {
                     $user = $this->userProvider->loadUserByIdentifier($userIdentifier);
-                    if (method_exists($user, 'setRoles')) {
-                        $user->setRoles($roles); // inject the roles directly
+                    if ($role !== null) {
+                        $user->setRole($role);
                     }
                     return $user;
                 })

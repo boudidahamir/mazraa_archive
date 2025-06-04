@@ -12,9 +12,17 @@ import com.mazraa.archive.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,30 +58,30 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDTO createUser(UserCreateRequest request, Long createdById) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new ResourceAlreadyExistsException("Username already exists");
-        }
-
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResourceAlreadyExistsException("Email already exists");
+            throw new ResourceAlreadyExistsException(
+                    "User with email " + request.getEmail() + " already exists");
         }
 
-        User creator = userRepository.findById(createdById)
-                .orElseThrow(() -> new ResourceNotFoundException("Creator user not found"));
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new ResourceAlreadyExistsException(
+                    "User with username " + request.getUsername() + " already exists");
+        }
 
         User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
+        user.setUsername(request.getUsername());
         user.setFullName(request.getFullName());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(User.UserRole.valueOf(request.getRole()));
         user.setEnabled(request.getEnabled());
+        user.setRoles("ROLE_" + request.getRole());
+        user.setActive(true);
         
-        user.setRoles("ROLE_" + user.getRole().name());
-        user.setActive(request.getEnabled());
-        
-        user.setCreatedBy(creator);
-        
+        if (createdById != null) {
+            userRepository.findById(createdById).ifPresent(user::setCreatedBy);
+        }
+
         return convertToDTO(userRepository.save(user));
     }
 
@@ -83,28 +91,24 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (!user.getEmail().equals(request.getEmail()) && 
-            userRepository.existsByEmail(request.getEmail())) {
-            throw new ResourceAlreadyExistsException("Email already exists");
+        if (!user.getEmail().equals(request.getEmail()) &&
+                userRepository.existsByEmail(request.getEmail())) {
+            throw new ResourceAlreadyExistsException(
+                    "User with email " + request.getEmail() + " already exists");
         }
-
-        User updater = userRepository.findById(updatedById)
-                .orElseThrow(() -> new ResourceNotFoundException("Updater user not found"));
 
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
         user.setRole(User.UserRole.valueOf(request.getRole()));
-        user.setRoles("ROLE_" + user.getRole().name());
-        
+        user.setEnabled(request.getEnabled());
 
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
-        if (request.getEnabled() != null) {
-            user.setEnabled(request.getEnabled());
-            user.setActive(request.getEnabled());
+
+        if (updatedById != null) {
+            userRepository.findById(updatedById).ifPresent(user::setUpdatedBy);
         }
-        user.setUpdatedBy(updater);
 
         return convertToDTO(userRepository.save(user));
     }
@@ -128,9 +132,48 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserDTO> searchUsers(String searchTerm, Pageable pageable) {
-        return userRepository.findAll(pageable)
-                .map(this::convertToDTO);
+    public Page<UserDTO> searchUsers(String searchTerm, String role, String status, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Specification<User> spec = Specification.where(null);
+
+        // Add search term filter
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                String pattern = "%" + searchTerm.toLowerCase() + "%";
+                return cb.or(
+                    cb.like(cb.lower(root.get("fullName")), pattern),
+                    cb.like(cb.lower(root.get("email")), pattern),
+                    cb.like(cb.lower(root.get("username")), pattern)
+                );
+            });
+        }
+
+        // Add role filter
+        if (role != null && !role.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("role"), User.UserRole.valueOf(role))
+            );
+        }
+
+        // Add status filter
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("enabled"), status.equals("active"))
+            );
+        }
+
+        // Add date range filter
+        if (startDate != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.greaterThanOrEqualTo(root.get("createdAt"), startDate.atStartOfDay())
+            );
+        }
+        if (endDate != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.lessThanOrEqualTo(root.get("createdAt"), endDate.atTime(LocalTime.MAX))
+            );
+        }
+
+        return ((JpaSpecificationExecutor<User>)userRepository).findAll(spec, pageable).map(this::convertToDTO);
     }
 
     @Override
@@ -164,25 +207,44 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void updateLastLogin(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
     private UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
+        dto.setUsername(user.getUsername());
         dto.setFullName(user.getFullName());
         dto.setRole(user.getRole().name());
-        dto.setPassword(user.getPassword());
         dto.setEnabled(user.isEnabled());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
+        dto.setPassword(user.getPassword());
+
         if (user.getCreatedBy() != null) {
             dto.setCreatedById(user.getCreatedBy().getId());
             dto.setCreatedByName(user.getCreatedBy().getFullName());
         }
+        
         if (user.getUpdatedBy() != null) {
             dto.setUpdatedById(user.getUpdatedBy().getId());
             dto.setUpdatedByName(user.getUpdatedBy().getFullName());
         }
+        
         return dto;
     }
 } 

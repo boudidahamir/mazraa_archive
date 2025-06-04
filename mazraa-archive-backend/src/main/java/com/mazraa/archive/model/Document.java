@@ -20,7 +20,7 @@ public class Document {
     @JoinColumn(name = "document_type_id", nullable = false)
     private DocumentType documentType;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true, nullable = true)
     private String barcode;
 
     @Column(nullable = false)
@@ -33,7 +33,7 @@ public class Document {
     private String status;
 
     @ManyToOne
-    @JoinColumn(name = "storage_location_id")
+    @JoinColumn(name = "storage_location_id", nullable = true)
     private StorageLocation storageLocation;
 
     @Column(nullable = false)

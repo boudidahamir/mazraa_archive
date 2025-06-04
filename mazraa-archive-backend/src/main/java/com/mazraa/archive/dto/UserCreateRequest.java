@@ -26,9 +26,9 @@ public class UserCreateRequest {
     private String fullName;
 
     @NotBlank(message = "Role is required")
+    @Pattern(regexp = "^(ADMIN|USER)$", message = "Role must be either ADMIN or USER")
     private String role;
 
-    @NotNull(message = "Enabled is required")
-    private Boolean enabled;
-
+    @NotNull(message = "Enabled status is required")
+    private Boolean enabled = true;
 } 

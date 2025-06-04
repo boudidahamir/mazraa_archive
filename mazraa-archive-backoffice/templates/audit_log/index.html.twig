@@ -1,27 +1,413 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Historique des actions{% endblock %}
+{% block title %}Journal d'audit - Mazraa Archive{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active">Journal d'audit</li>
+{% endblock %}
 
 {% block body %}
-    <h1>Historique des actions</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Utilisateur</th>
-                <th>Action</th>
-                <th>Entité</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-                <tr>
-                    <td>{{ log.username }}</td>
-                    <td>{{ log.action }}</td>
-                    <td>{{ log.entityType }} ({{ log.entityId }})</td>
-                    <td>{{ log.createdAt|date('Y-m-d H:i') }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">
+            <i class="fas fa-history me-2"></i>Journal d'audit
+            <small class="text-muted fs-6 ms-2">{{ totalLogs }} entrées trouvées</small>
+        </h1>
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-primary" id="exportCsv">
+                <i class="fas fa-file-csv me-2"></i>Exporter CSV
+            </button>
+            <button type="button" class="btn btn-outline-primary" id="exportPdf">
+                <i class="fas fa-file-pdf me-2"></i>Exporter PDF
+            </button>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Total Actions -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Total des actions</h6>
+                            <h2 class="card-title mb-0 display-6">{{ totalLogs }}</h2>
+                            <small class="text-muted">
+                                <i class="fas fa-chart-line me-1"></i>Dernières 24h
+                            </small>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-history fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Users -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Utilisateurs actifs</h6>
+                            <h2 class="card-title mb-0 display-6">{{ activeUsers }}</h2>
+                            <small class="text-success">
+                                <i class="fas fa-user-check me-1"></i>Connectés
+                            </small>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-users fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Most Active User -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Utilisateur le plus actif</h6>
+                            <h2 class="card-title mb-0 h4">{{ mostActiveUser.username|default('N/A') }}</h2>
+                            <small class="text-info">
+                                <i class="fas fa-bolt me-1"></i>{{ mostActiveUser.actions|default(0) }} actions
+                            </small>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-user-clock fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Actions -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Actions critiques</h6>
+                            <h2 class="card-title mb-0 display-6">{{ criticalActions }}</h2>
+                            <small class="text-danger">
+                                <i class="fas fa-exclamation-circle me-1"></i>Suppressions
+                            </small>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-shield-alt fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-search me-2"></i>Filtres de recherche
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{{ path('audit_log_index') }}" class="row g-3" id="searchForm">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="search" class="form-label">
+                            <i class="fas fa-search me-1"></i>Rechercher
+                        </label>
+                        <input type="text" 
+                               id="search" 
+                               name="search" 
+                               class="form-control" 
+                               value="{{ search|default('') }}" 
+                               placeholder="Utilisateur, détails...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="action" class="form-label">
+                            <i class="fas fa-tasks me-1"></i>Action
+                        </label>
+                        <select id="action" name="action" class="form-select">
+                            <option value="">Toutes les actions</option>
+                            <option value="CREATE" {% if action == 'CREATE' %}selected{% endif %}>Création</option>
+                            <option value="UPDATE" {% if action == 'UPDATE' %}selected{% endif %}>Modification</option>
+                            <option value="DELETE" {% if action == 'DELETE' %}selected{% endif %}>Suppression</option>
+                            <option value="LOGIN" {% if action == 'LOGIN' %}selected{% endif %}>Connexion</option>
+                            <option value="LOGOUT" {% if action == 'LOGOUT' %}selected{% endif %}>Déconnexion</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="entityType" class="form-label">
+                            <i class="fas fa-cube me-1"></i>Type d'entité
+                        </label>
+                        <select id="entityType" name="entityType" class="form-select">
+                            <option value="">Tous les types</option>
+                            <option value="DOCUMENT" {% if entityType == 'DOCUMENT' %}selected{% endif %}>Document</option>
+                            <option value="DOCUMENT_TYPE" {% if entityType == 'DOCUMENT_TYPE' %}selected{% endif %}>Type de document</option>
+                            <option value="STORAGE_LOCATION" {% if entityType == 'STORAGE_LOCATION' %}selected{% endif %}>Emplacement</option>
+                            <option value="USER" {% if entityType == 'USER' %}selected{% endif %}>Utilisateur</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="d-flex gap-2 w-100">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="fas fa-search me-1"></i>Rechercher
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="resetFilters">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="dateRange" class="form-label">
+                            <i class="fas fa-calendar me-1"></i>Période
+                        </label>
+                        <div class="input-group">
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="startDate" 
+                                   name="startDate" 
+                                   value="{{ startDate|default('') }}">
+                            <span class="input-group-text">à</span>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="endDate" 
+                                   name="endDate" 
+                                   value="{{ endDate|default('') }}">
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="sort" id="sortField" value="{{ sort|default('createdAt') }}">
+                <input type="hidden" name="direction" id="sortDirection" value="{{ direction|default('desc') }}">
+                <input type="hidden" name="page" id="page" value="{{ page|default(1) }}">
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="createdAt">
+                                <div class="d-flex align-items-center">
+                                    <span>Date/Heure</span>
+                                    <i class="fas fa-sort{{ sort == 'createdAt' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="username">
+                                <div class="d-flex align-items-center">
+                                    <span>Utilisateur</span>
+                                    <i class="fas fa-sort{{ sort == 'username' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="action">
+                                <div class="d-flex align-items-center">
+                                    <span>Action</span>
+                                    <i class="fas fa-sort{{ sort == 'action' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="entityType">
+                                <div class="d-flex align-items-center">
+                                    <span>Type d'entité</span>
+                                    <i class="fas fa-sort{{ sort == 'entityType' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="entityId">
+                                <div class="d-flex align-items-center">
+                                    <span>ID Entité</span>
+                                    <i class="fas fa-sort{{ sort == 'entityId' ? (direction == 'asc' ? '-up' : '-down') : '' }} ms-2"></i>
+                                </div>
+                            </th>
+                            <th>Détails</th>
+                            <th>IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <td>
+                                    <i class="fas fa-clock me-1 text-muted"></i>
+                                    {{ log.createdAt|date('d/m/Y H:i:s') }}
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user me-2 text-primary"></i>
+                                        {{ log.username }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% set actionInfo = {
+                                        'CREATE': {class: 'bg-success', icon: 'plus-circle'},
+                                        'UPDATE': {class: 'bg-warning', icon: 'edit'},
+                                        'DELETE': {class: 'bg-danger', icon: 'trash-alt'},
+                                        'LOGIN': {class: 'bg-info', icon: 'sign-in-alt'},
+                                        'LOGOUT': {class: 'bg-secondary', icon: 'sign-out-alt'}
+                                    } %}
+                                    {% set info = actionInfo[log.action]|default({class: 'bg-primary', icon: 'circle'}) %}
+                                    <span class="badge {{ info.class }}">
+                                        <i class="fas fa-{{ info.icon }} me-1"></i>
+                                        {{ log.action }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% set entityIcon = {
+                                        'DOCUMENT': 'file-alt',
+                                        'DOCUMENT_TYPE': 'tags',
+                                        'STORAGE_LOCATION': 'warehouse',
+                                        'USER': 'user'
+                                    } %}
+                                    <span class="badge bg-light text-dark">
+                                        <i class="fas fa-{{ entityIcon[log.entityType]|default('cube') }} me-1"></i>
+                                        {{ log.entityType }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="fas fa-hashtag me-1"></i>{{ log.entityId }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <pre class="mb-0 small bg-light p-2 rounded"><code>{{ log.details }}</code></pre>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="fas fa-network-wired me-1"></i>{{ log.ipAddress }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>Aucune entrée trouvée dans le journal d'audit
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if totalPages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {{ page <= 1 ? 'disabled' : '' }}">
+                    <a class="page-link" href="#" data-page="{{ page - 1 }}" {{ page <= 1 ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                        <i class="fas fa-chevron-left me-1"></i>Précédent
+                    </a>
+                </li>
+                {% for i in 1..totalPages %}
+                    <li class="page-item {{ page == i ? 'active' : '' }}">
+                        <a class="page-link" href="#" data-page="{{ i }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {{ page >= totalPages ? 'disabled' : '' }}">
+                    <a class="page-link" href="#" data-page="{{ page + 1 }}" {{ page >= totalPages ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                        Suivant<i class="fas fa-chevron-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Sorting functionality
+    document.querySelectorAll('th.sortable').forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function() {
+            const sort = this.dataset.sort;
+            const currentSort = document.getElementById('sortField').value;
+            const currentDirection = document.getElementById('sortDirection').value;
+            
+            let newDirection = 'asc';
+            if (sort === currentSort && currentDirection === 'asc') {
+                newDirection = 'desc';
+            }
+            
+            document.getElementById('sortField').value = sort;
+            document.getElementById('sortDirection').value = newDirection;
+            document.getElementById('searchForm').submit();
+        });
+    });
+
+    // Pagination functionality
+    document.querySelectorAll('.pagination .page-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('page').value = this.dataset.page;
+            document.getElementById('searchForm').submit();
+        });
+    });
+
+    // Reset filters
+    document.getElementById('resetFilters').addEventListener('click', function() {
+        document.getElementById('search').value = '';
+        document.getElementById('action').value = '';
+        document.getElementById('entityType').value = '';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        document.getElementById('sortField').value = 'createdAt';
+        document.getElementById('sortDirection').value = 'desc';
+        document.getElementById('page').value = '1';
+        document.getElementById('searchForm').submit();
+    });
+
+    // Export functionality
+    function handleExport(type) {
+        const form = document.getElementById('searchForm');
+        const formData = new FormData(form);
+        
+        // Convert form elements to an object
+        const formObject = {};
+        formData.forEach((value, key) => {
+            formObject[key] = value;
+        });
+        
+        // Add export type
+        formObject.export = type;
+        
+        // Convert to URLSearchParams
+        const params = new URLSearchParams();
+        Object.keys(formObject).forEach(key => {
+            if (formObject[key]) { // Only add non-empty values
+                params.append(key, formObject[key]);
+            }
+        });
+        
+        // Get the base URL from the form's action
+        const baseUrl = form.getAttribute('action');
+        
+        // Construct and navigate to the export URL
+        window.location.href = `${baseUrl}?${params.toString()}`;
+    }
+
+    document.getElementById('exportCsv').addEventListener('click', function() {
+        handleExport('csv');
+    });
+
+    document.getElementById('exportPdf').addEventListener('click', function() {
+        handleExport('pdf');
+    });
+});
+</script>
 {% endblock %}

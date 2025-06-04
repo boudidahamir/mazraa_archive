@@ -15,6 +15,7 @@ class StorageLocation
     private ?bool $isActive = true;
     private ?\DateTimeImmutable $createdAt = null;
     private ?\DateTimeImmutable $updatedAt = null;
+    private ?int $usedSpace = 0;
 
     public static function fromApiResponse(array $data): self
     {
@@ -28,6 +29,7 @@ class StorageLocation
         $storageLocation->setBox($data['box'] ?? null);
         $storageLocation->setCapacity($data['capacity'] ?? null);
         $storageLocation->setIsActive($data['active'] ?? true);
+        $storageLocation->setUsedSpace($data['usedSpace'] ?? 0);
 
         if (isset($data['createdAt'])) {
             $storageLocation->setCreatedAt(new \DateTimeImmutable($data['createdAt']));
@@ -151,25 +153,35 @@ class StorageLocation
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
-{
-    return $this->createdAt;
-}
+    {
+        return $this->createdAt;
+    }
 
-public function setCreatedAt(?\DateTimeImmutable $createdAt): self
-{
-    $this->createdAt = $createdAt;
-    return $this;
-}
+    public function setCreatedAt(?\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
 
-public function getUpdatedAt(): ?\DateTimeImmutable
-{
-    return $this->updatedAt;
-}
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
 
-public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
-{
-    $this->updatedAt = $updatedAt;
-    return $this;
-}
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
 
+    public function getUsedSpace(): ?int
+    {
+        return $this->usedSpace;
+    }
+
+    public function setUsedSpace(?int $usedSpace): self
+    {
+        $this->usedSpace = $usedSpace;
+        return $this;
+    }
 }

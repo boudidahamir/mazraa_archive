@@ -2,10 +2,16 @@
 
 {% block title %}Tableau de bord - Mazraa Archive{% endblock %}
 
+{% block breadcrumb %}
+    <li class="breadcrumb-item active">Tableau de bord</li>
+{% endblock %}
+
 {% block body %}
     <div class="row mb-4">
         <div class="col-12">
-            <h1 class="h3 mb-4">Tableau de bord</h1>
+            <h1 class="page-title">
+                <i class="fas fa-tachometer-alt me-2"></i>Tableau de bord
+            </h1>
         </div>
     </div>
 
@@ -16,10 +22,13 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title text-muted">Documents</h6>
-                            <h2 class="mb-0">{{ totalDocuments }}</h2>
+                            <h6 class="card-subtitle mb-2 text-muted">Total Documents</h6>
+                            <h2 class="card-title mb-0 display-6">{{ totalDocuments }}</h2>
+                            <small class="text-success">
+                                <i class="fas fa-chart-line me-1"></i>+{{ recentDocuments }} cette semaine
+                            </small>
                         </div>
-                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
                             <i class="fas fa-file-alt fa-2x text-primary"></i>
                         </div>
                     </div>
@@ -33,10 +42,13 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title text-muted">Emplacements</h6>
-                            <h2 class="mb-0">{{ totalStorageLocations }}</h2>
+                            <h6 class="card-subtitle mb-2 text-muted">Total Emplacements</h6>
+                            <h2 class="card-title mb-0 display-6">{{ totalStorageLocations }}</h2>
+                            <small class="text-success">
+                                <i class="fas fa-check-circle me-1"></i>{{ storageUtilization }}% utilisés
+                            </small>
                         </div>
-                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
                             <i class="fas fa-warehouse fa-2x text-success"></i>
                         </div>
                     </div>
@@ -50,10 +62,13 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title text-muted">Emplacements utilisés</h6>
-                            <h2 class="mb-0">{{ usedStorageLocations }}</h2>
+                            <h6 class="card-subtitle mb-2 text-muted">Emplacements Utilisés</h6>
+                            <h2 class="card-title mb-0 display-6">{{ usedStorageLocations }}</h2>
+                            <small class="text-warning">
+                                <i class="fas fa-exclamation-circle me-1"></i>{{ nearFullLocations }} presque pleins
+                            </small>
                         </div>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
                             <i class="fas fa-box fa-2x text-warning"></i>
                         </div>
                     </div>
@@ -67,10 +82,13 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title text-muted">Emplacements disponibles</h6>
-                            <h2 class="mb-0">{{ availableStorageLocations }}</h2>
+                            <h6 class="card-subtitle mb-2 text-muted">Emplacements Disponibles</h6>
+                            <h2 class="card-title mb-0 display-6">{{ availableStorageLocations }}</h2>
+                            <small class="text-info">
+                                <i class="fas fa-info-circle me-1"></i>{{ availabilityPercentage }}% de capacité
+                            </small>
                         </div>
-                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
                             <i class="fas fa-box-open fa-2x text-info"></i>
                         </div>
                     </div>
@@ -84,8 +102,15 @@
         <!-- Documents by Type -->
         <div class="col-md-6 mb-4">
             <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Documents par type</h5>
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Documents par type
+                        </h5>
+                        <button class="btn btn-sm btn-outline-secondary" id="refreshDocChart">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <canvas id="documentsByTypeChart"></canvas>
@@ -96,8 +121,15 @@
         <!-- Storage Location Usage -->
         <div class="col-md-6 mb-4">
             <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Utilisation des emplacements</h5>
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Utilisation des emplacements
+                        </h5>
+                        <button class="btn btn-sm btn-outline-secondary" id="refreshStorageChart">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <canvas id="storageUsageChart"></canvas>
@@ -105,30 +137,84 @@
             </div>
         </div>
     </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-history me-2"></i>Activité récente
+                        </h5>
+                        <a href="{{ path('audit_log_index') }}" class="btn btn-sm btn-primary">
+                            Voir tout <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Utilisateur</th>
+                                    <th>Détails</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in recentActivity %}
+                                    <tr>
+                                        <td>
+                                            {% set icon = {
+                                                'CREATE': 'plus-circle text-success',
+                                                'UPDATE': 'edit text-warning',
+                                                'DELETE': 'trash-alt text-danger',
+                                                'ARCHIVE': 'archive text-info'
+                                            } %}
+                                            <i class="fas fa-{{ icon[log.action] ?? 'circle' }} me-2"></i>
+                                            {{ log.action }}
+                                        </td>
+                                        <td>{{ log.username }}</td>
+                                        <td>{{ log.details }}</td>
+                                        <td>{{ log.createdAt|date('d/m/Y H:i') }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3">
+                                            <i class="fas fa-info-circle me-2"></i>Aucune activité récente
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
+    {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Documents by Type Chart
-            const documentsByTypeCtx = document.getElementById('documentsByTypeChart').getContext('2d');
-            new Chart(documentsByTypeCtx, {
+            const docTypeCtx = document.getElementById('documentsByTypeChart').getContext('2d');
+            const docTypeData = {{ documentsByType|json_encode|raw }};
+            new Chart(docTypeCtx, {
                 type: 'pie',
                 data: {
-                    labels: {{ chartLabels|json_encode|raw }},
-datasets: [{
-    data: {{ chartData|json_encode|raw }},
-    backgroundColor: [
-        '#4e73df',
-        '#1cc88a',
-        '#36b9cc',
-        '#f6c23e',
-        '#ff6384',
-        '#9966ff'
-    ]
-}]
-
+                    labels: Object.keys(docTypeData),
+                    datasets: [{
+                        data: Object.values(docTypeData),
+                        backgroundColor: [
+                            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                            '#858796', '#5a5c69', '#2e59d9', '#17a673', '#2c9faf'
+                        ]
+                    }]
                 },
                 options: {
                     responsive: true,
@@ -141,18 +227,36 @@ datasets: [{
             });
 
             // Storage Usage Chart
-            const storageUsageCtx = document.getElementById('storageUsageChart').getContext('2d');
-            new Chart(storageUsageCtx, {
-                type: 'doughnut',
+            const storageCtx = document.getElementById('storageUsageChart').getContext('2d');
+            new Chart(storageCtx, {
+                type: 'bar',
                 data: {
-                    labels: ['Utilisés', 'Disponibles'],
+                    labels: ['Utilisation des emplacements'],
                     datasets: [{
-                        data: [{{ usedStorageLocations }}, {{ availableStorageLocations }}],
-                        backgroundColor: ['#f6c23e', '#1cc88a']
+                        label: 'Utilisés',
+                        data: [{{ usedStorageLocations }}],
+                        backgroundColor: '#1cc88a'
+                    }, {
+                        label: 'Disponibles',
+                        data: [{{ availableStorageLocations }}],
+                        backgroundColor: '#36b9cc'
+                    }, {
+                        label: 'Presque pleins',
+                        data: [{{ nearFullLocations }}],
+                        backgroundColor: '#f6c23e'
                     }]
                 },
                 options: {
                     responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            stacked: true
+                        },
+                        x: {
+                            stacked: true
+                        }
+                    },
                     plugins: {
                         legend: {
                             position: 'bottom'

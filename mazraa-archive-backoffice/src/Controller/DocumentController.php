@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 #[Route('/documents')]
 class DocumentController extends AbstractController
@@ -23,48 +24,127 @@ class DocumentController extends AbstractController
     #[Route('/', name: 'app_documents_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
+        // Get all filter parameters
         $search = $request->query->get('search');
         $type = $request->query->get('type');
         $status = $request->query->get('status');
-    
-        $documents = [];
-    
+        $startDate = $request->query->get('startDate');
+        $endDate = $request->query->get('endDate');
+        $sort = $request->query->get('sort', 'createdAt');
+        $direction = $request->query->get('direction', 'desc');
+        $page = max(1, $request->query->getInt('page', 1)) - 1; // Convert to 0-based for API
+        $limit = 10; // Items per page
+
         try {
+            // Build query parameters
+            $params = [
+                'page' => $page,
+                'size' => $limit,
+                'sort' => $sort . ',' . $direction
+            ];
+
             if ($search) {
-                // Search endpoint
-                $result = $this->apiService->get('/documents/search', ['searchTerm' => $search]);
-                $documents = $result['content'] ?? $result;
-            } elseif ($type) {
-                // Filter by document type ID
-                $result = $this->apiService->get('/documents/type/' . $type);
-                $documents = $result['content'] ?? $result;
-            } else {
-                // Default: get all documents
-                $documents = $this->apiService->get('/documents');
+                $params['searchTerm'] = $search;
             }
-    
-            // Optional status filtering (client-side)
+            
+            if ($type) {
+                $params['documentTypeId'] = $type;
+            }
+
             if ($status) {
-                $documents = array_filter($documents, fn($doc) => $doc['status'] === $status);
+                $params['status'] = $status;
             }
-    
-            $documentTypes = $this->apiService->get('/document-types');
-            $documentStatuses = ['ACTIVE', 'ARCHIVED', 'RETRIEVED', 'DESTROYED'];
+
+            if ($startDate) {
+                $params['startDate'] = $startDate;
+            }
+
+            if ($endDate) {
+                $params['endDate'] = $endDate;
+            }
+
+            // Get documents with filters
+            $result = $this->apiService->get('/documents/search', $params);
+            
+            // Get document types for filter dropdown
+            $typeData = $this->apiService->get('/document-types/search', ['searchTerm' => '']);
+
+            // Get all documents to calculate statistics
+            $allDocs = $this->apiService->get('/documents/search', ['size' => 1000]);
+            $allDocuments = $allDocs['content'] ?? [];
+            
+            // Calculate document statistics
+            $activeDocuments = count(array_filter($allDocuments, fn($doc) => $doc['status'] === 'ACTIVE'));
+            $archivedDocuments = count(array_filter($allDocuments, fn($doc) => $doc['status'] === 'ARCHIVED'));
+            $retrievedDocuments = count(array_filter($allDocuments, fn($doc) => $doc['status'] === 'RETRIEVED'));
+            $destroyedDocuments = count(array_filter($allDocuments, fn($doc) => $doc['status'] === 'DESTROYED'));
+
+            // Calculate documents per type
+            $documentsPerType = [];
+            foreach ($typeData['content'] ?? [] as $type) {
+                $typeDocuments = array_filter($allDocuments, fn($doc) => ($doc['documentType']['id'] ?? null) === $type['id']);
+                $documentsPerType[$type['name']] = count($typeDocuments);
+            }
+
+            // Calculate documents per location
+            $locations = $this->apiService->get('/storage-locations');
+            $documentsPerLocation = [];
+            foreach ($locations ?? [] as $location) {
+                $locationDocuments = array_filter($allDocuments, fn($doc) => ($doc['storageLocation']['id'] ?? null) === $location['id']);
+                $documentsPerLocation[$location['name']] = count($locationDocuments);
+            }
+
+            // Get recent activities (last 10 modified documents)
+            usort($allDocuments, fn($a, $b) => strtotime($b['lastModifiedDate'] ?? '') - strtotime($a['lastModifiedDate'] ?? ''));
+            $recentActivities = array_slice($allDocuments, 0, 10);
+
+            return $this->render('document/index.html.twig', [
+                'documents' => $result['content'] ?? [],
+                'totalDocuments' => $result['totalElements'] ?? 0,
+                'page' => $page + 1, // Convert back to 1-based for template
+                'totalPages' => $result['totalPages'] ?? 1,
+                'documentTypes' => $typeData['content'] ?? [],
+                'documentStatuses' => ['ACTIVE', 'ARCHIVED', 'RETRIEVED', 'DESTROYED'],
+                'search' => $search,
+                'selectedType' => $type,
+                'selectedStatus' => $status,
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+                'sort' => $sort,
+                'direction' => $direction,
+                'activeDocuments' => $activeDocuments,
+                'archivedDocuments' => $archivedDocuments,
+                'retrievedDocuments' => $retrievedDocuments,
+                'destroyedDocuments' => $destroyedDocuments,
+                'documentsPerType' => $documentsPerType,
+                'documentsPerLocation' => $documentsPerLocation,
+                'recentActivities' => $recentActivities
+            ]);
         } catch (\Exception $e) {
             $this->addFlash('error', 'Erreur lors de la récupération des documents : ' . $e->getMessage());
-            $documents = [];
-            $documentTypes = [];
-            $documentStatuses = [];
+            return $this->render('document/index.html.twig', [
+                'documents' => [],
+                'totalDocuments' => 0,
+                'page' => 1,
+                'totalPages' => 1,
+                'documentTypes' => [],
+                'documentStatuses' => ['ACTIVE', 'ARCHIVED', 'RETRIEVED', 'DESTROYED'],
+                'search' => $search,
+                'selectedType' => $type,
+                'selectedStatus' => $status,
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+                'sort' => $sort,
+                'direction' => $direction,
+                'activeDocuments' => 0,
+                'archivedDocuments' => 0,
+                'retrievedDocuments' => 0,
+                'destroyedDocuments' => 0,
+                'documentsPerType' => [],
+                'documentsPerLocation' => [],
+                'recentActivities' => []
+            ]);
         }
-    
-        return $this->render('document/index.html.twig', [
-            'documents' => $documents,
-            'documentTypes' => $documentTypes,
-            'documentStatuses' => $documentStatuses,
-            'search' => $search,
-            'selectedType' => $type,
-            'selectedStatus' => $status,
-        ]);
     }
     
     #[Route('/new', name: 'app_documents_new', methods: ['GET', 'POST'])]
@@ -248,5 +328,51 @@ class DocumentController extends AbstractController
         }
 
         return $this->redirectToRoute('app_documents_show', ['id' => $id]);
+    }
+
+    #[Route('/{id}/export-pdf', name: 'app_documents_export_pdf', methods: ['GET'])]
+    public function exportPdf(int $id): Response
+    {
+        try {
+            $document = $this->apiService->get('/documents/' . $id);
+            
+            // Create PDF content
+            $html = $this->renderView('document/pdf.html.twig', [
+                'document' => $document,
+                'date' => new \DateTime()
+            ]);
+
+            // For now, we'll return HTML as a downloadable file
+            // Later, you can integrate a proper PDF library like wkhtmltopdf or DomPDF
+            $response = new Response($html);
+            $disposition = HeaderUtils::makeDisposition(
+                HeaderUtils::DISPOSITION_ATTACHMENT,
+                'document_' . $document['id'] . '_' . date('Y-m-d_H-i-s') . '.html'
+            );
+
+            $response->headers->set('Content-Type', 'text/html');
+            $response->headers->set('Content-Disposition', $disposition);
+
+            return $response;
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de l\'export du document: ' . $e->getMessage());
+            return $this->redirectToRoute('app_documents_show', ['id' => $id]);
+        }
+    }
+
+    #[Route('/{id}/print', name: 'app_documents_print', methods: ['GET'])]
+    public function print(int $id): Response
+    {
+        try {
+            $document = $this->apiService->get('/documents/' . $id);
+            
+            return $this->render('document/print.html.twig', [
+                'document' => $document,
+                'date' => new \DateTime()
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de l\'impression du document: ' . $e->getMessage());
+            return $this->redirectToRoute('app_documents_show', ['id' => $id]);
+        }
     }
 }
