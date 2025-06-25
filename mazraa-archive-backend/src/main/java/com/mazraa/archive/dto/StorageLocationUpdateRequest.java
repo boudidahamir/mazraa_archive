@@ -27,4 +27,8 @@ public class StorageLocationUpdateRequest {
 
     @NotNull(message = "Active status is required")
     private Boolean active;
+
+    @NotNull(message = "Used space is required")
+    @Positive(message = "Used space must be zero or positive")
+    private Long usedSpace;
 } 

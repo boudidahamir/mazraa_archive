@@ -86,6 +86,7 @@ public class StorageLocationServiceImpl implements StorageLocationService {
         location.setRow(request.getRow());
         location.setBox(request.getBox());
         location.setCapacity(request.getCapacity());
+        location.setUsedSpace(request.getUsedSpace());
         location.setActive(request.getActive());
         location.setUpdatedBy(user);
         location.setUpdatedAt(LocalDateTime.now());

@@ -4,6 +4,7 @@ import '../core/models/document.dart';
 import '../core/models/document_type.dart';
 import '../core/models/storage_location.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../core/models/user.dart';
 
 class ApiService {
   final Dio _dio;
@@ -197,6 +198,10 @@ class ApiService {
     }
   }
 
-
+  // Fetch current user profile
+  Future<User> getCurrentUserProfile() async {
+    final response = await _dio.get('/auth/me');
+    return User.fromJson(response.data);
+  }
 
 } 

@@ -4,6 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import '../../../../services/api_service.dart';
 import '../screens/home_screen.dart';
+import '../../../../services/local_storage_service.dart';
+import '../../../../core/models/user.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -49,6 +51,12 @@ class _LoginFormState extends State<LoginForm> {
 
         await secureStorage.write(key: 'username', value: _usernameController.text);
         await secureStorage.write(key: 'password', value: _passwordController.text);
+
+        // Fetch and save user profile
+        final localStorageService = LocalStorageService();
+        final user = await apiService.getCurrentUserProfile();
+        await localStorageService.saveUser(user);
+        await localStorageService.saveCurrentUserId(user.id);
       } else {
         final savedUsername = await secureStorage.read(key: 'username');
         final savedPassword = await secureStorage.read(key: 'password');

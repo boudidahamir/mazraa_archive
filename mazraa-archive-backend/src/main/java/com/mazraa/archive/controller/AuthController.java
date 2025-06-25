@@ -3,8 +3,10 @@ package com.mazraa.archive.controller;
 import com.mazraa.archive.dto.LoginRequest;
 import com.mazraa.archive.dto.RegisterRequest;
 import com.mazraa.archive.dto.AuthResponse;
+import com.mazraa.archive.dto.UserDTO;
 import com.mazraa.archive.security.JwtTokenProvider;
 import com.mazraa.archive.service.UserService;
+import com.mazraa.archive.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/auth")
@@ -54,5 +57,10 @@ public class AuthController {
         String jwt = tokenProvider.generateToken(authentication);
 
         return ResponseEntity.ok(new AuthResponse(jwt));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser(@AuthenticationPrincipal UserDetailsImpl currentUser) {
+        return ResponseEntity.ok(userService.getUser(currentUser.getId()));
     }
 }
