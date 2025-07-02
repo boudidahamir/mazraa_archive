@@ -55,14 +55,27 @@ class _LoginFormState extends State<LoginForm> {
         // Fetch and save user profile
         final localStorageService = LocalStorageService();
         final user = await apiService.getCurrentUserProfile();
+        print('Fetched user profile: ${user.toJson()}');
         await localStorageService.saveUser(user);
-        await localStorageService.saveCurrentUserId(user.id);
+        if (user.id != null) {
+          await localStorageService.saveCurrentUserId(user.id!);
+          print('Saved current user ID: ${user.id}');
+        } else {
+          throw Exception('User ID is null');
+        }
       } else {
         final savedUsername = await secureStorage.read(key: 'username');
         final savedPassword = await secureStorage.read(key: 'password');
 
         if (_usernameController.text != savedUsername || _passwordController.text != savedPassword) {
           throw Exception('Offline login failed');
+        }
+        
+        // For offline login, try to get the saved user profile
+        final localStorageService = LocalStorageService();
+        final savedUser = await localStorageService.getCurrentUser();
+        if (savedUser == null) {
+          throw Exception('No saved user profile found');
         }
       }
 
@@ -94,12 +107,12 @@ class _LoginFormState extends State<LoginForm> {
           TextFormField(
             controller: _usernameController,
             decoration: const InputDecoration(
-              labelText: 'Username',
+              labelText: 'Nom d\'utilisateur',
               prefixIcon: Icon(Icons.person),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your username';
+                return 'Veuillez saisir votre nom d\'utilisateur';
               }
               return null;
             },
@@ -108,13 +121,13 @@ class _LoginFormState extends State<LoginForm> {
           TextFormField(
             controller: _passwordController,
             decoration: const InputDecoration(
-              labelText: 'Password',
+              labelText: 'Mot de passe',
               prefixIcon: Icon(Icons.lock),
             ),
             obscureText: true,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your password';
+                return 'Veuillez saisir votre mot de passe';
               }
               return null;
             },
@@ -142,7 +155,7 @@ class _LoginFormState extends State<LoginForm> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                : const Text('Login'),
+                : const Text('Se connecter'),
           ),
         ],
       ),

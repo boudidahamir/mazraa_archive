@@ -9,6 +9,7 @@ import '../../../../core/models/document.dart';
 import '../../../../core/models/storage_location.dart';
 import '../widgets/scan_result_dialog.dart';
 import '../../../barcode/presentation/screens/generate_barcode_screen.dart';
+import '../../../documents/presentation/screens/create_document_screen.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -141,7 +142,7 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Document Not Found'),
+            title: const Text('Document introuvable'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -153,8 +154,8 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                 const SizedBox(height: 16),
                 Text(
                   _isOnline
-                      ? 'This barcode is not associated with any document. Would you like to generate a new barcode?'
-                      : 'This barcode is not found in local storage. Please connect to the internet to check the server or generate a new barcode.',
+                      ? 'Ce code-barres n\'est associé à aucun document. Voulez-vous générer un nouveau code-barres ?'
+                      : 'Ce code-barres n\'est pas trouvé dans le stockage local. Veuillez vous connecter à Internet pour vérifier sur le serveur ou générer un nouveau code-barres.',
                   textAlign: TextAlign.center,
                 ),
                 if (!_isOnline) ...[
@@ -166,7 +167,7 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'You are currently offline',
+                    'Vous êtes actuellement hors ligne',
                     style: TextStyle(
                       color: Colors.orange,
                       fontWeight: FontWeight.bold,
@@ -184,7 +185,7 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                     _isProcessing = false;
                   });
                 },
-                child: const Text('Cancel'),
+                child: const Text('Annuler'),
               ),
               if (_isOnline)
                 ElevatedButton.icon(
@@ -197,7 +198,7 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                     );
                   },
                   icon: const Icon(Icons.qr_code),
-                  label: const Text('Generate Barcode'),
+                  label: const Text('Générer un code-barres'),
                 ),
             ],
           ),
@@ -459,13 +460,60 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
     }
   }
 
+  void _showGenerateBarcodeOptions() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Générer un code-barres'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.qr_code),
+              title: const Text('Générer avec un document existant'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GenerateBarcodeScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.qr_code_2),
+              title: const Text('Créer un nouveau document'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const CreateDocumentScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.close),
+            label: const Text('Annuler'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            const Text('Scan Barcode'),
+            const Text('Scanner un code-barres'),
             if (!_isOnline) ...[
               const SizedBox(width: 8),
               Container(
@@ -480,7 +528,7 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                     Icon(Icons.cloud_off, size: 16, color: Colors.orange),
                     SizedBox(width: 4),
                     Text(
-                      'Offline',
+                      'Hors ligne',
                       style: TextStyle(
                         color: Colors.orange,
                         fontSize: 12,
@@ -575,8 +623,8 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                   ),
                   child: Text(
                     _isOnline
-                        ? 'Position the barcode within the frame'
-                        : 'Offline Mode - Changes will sync when online',
+                        ? 'Positionnez le code-barres dans le cadre'
+                        : 'Mode hors ligne - Les modifications seront synchronisées lorsque vous serez en ligne',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -586,14 +634,10 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                 const SizedBox(height: 16),
                   FloatingActionButton.extended(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const GenerateBarcodeScreen(),
-                        ),
-                      );
+                      _showGenerateBarcodeOptions();
                     },
                     icon: const Icon(Icons.qr_code),
-                    label: const Text('Generate Barcode'),
+                    label: const Text('Générer un code-barres'),
                   ),
               ],
             ),

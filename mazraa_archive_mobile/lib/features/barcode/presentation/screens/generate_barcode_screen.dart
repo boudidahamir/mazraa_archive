@@ -261,7 +261,7 @@ class _GenerateBarcodeScreenState extends State<GenerateBarcodeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Generate Barcode')),
+      appBar: AppBar(title: const Text('Générer un code-barres')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -273,7 +273,7 @@ class _GenerateBarcodeScreenState extends State<GenerateBarcodeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Document Type', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const Text('Type de document', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<DocumentType>(
                       value: _selectedDocumentType,
@@ -322,7 +322,7 @@ class _GenerateBarcodeScreenState extends State<GenerateBarcodeScreen> {
                         },
                       ),
                     const SizedBox(height: 16),
-                    const Text('Storage Location', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const Text('Emplacement de stockage', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     if (_isLoadingLocations)
                       const Center(child: CircularProgressIndicator())
@@ -364,7 +364,7 @@ class _GenerateBarcodeScreenState extends State<GenerateBarcodeScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
                         )
-                            : const Text('Generate Barcode'),
+                            : const Text('Générer le code-barres'),
                       ),
                     ),
                   ],
@@ -379,7 +379,7 @@ class _GenerateBarcodeScreenState extends State<GenerateBarcodeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Generated Barcode', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Text('Code-barres généré', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 16),
                       Center(
                         child: BarcodeWidget(
@@ -415,14 +415,14 @@ class _GenerateBarcodeScreenState extends State<GenerateBarcodeScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
                             )
                                 : const Icon(Icons.save),
-                            label: const Text('Save'),
+                            label: const Text('Enregistrer'),
                           ),
                           ElevatedButton.icon(
                             onPressed: () {
                               // TODO: Implement share
                             },
                             icon: const Icon(Icons.share),
-                            label: const Text('Share'),
+                            label: const Text('Partager'),
                           ),
                         ],
                       ),

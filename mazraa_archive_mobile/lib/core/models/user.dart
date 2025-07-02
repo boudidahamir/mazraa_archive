@@ -52,9 +52,28 @@ class User {
       deviceId: json['deviceId'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
-      createdById: json['createdBy']?['id'],
-      updatedById: json['updatedBy']?['id'],
-      isActive: json['isActive'],
+      createdById: json['createdById'],
+      updatedById: json['updatedById'],
+      isActive: json['isActive'] ?? true,
+      roles: json['roles'] ?? 'ROLE_${json['role']}',
+    );
+  }
+
+  // Method to create User from SQLite data (flattened structure)
+  factory User.fromSqlite(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      username: json['username'],
+      email: json['email'],
+      fullName: json['fullName'],
+      role: $enumDecode(_$UserRoleEnumMap, json['role']),
+      enabled: json['enabled'] == 1,
+      deviceId: json['deviceId'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      createdById: json['createdById'],
+      updatedById: json['updatedById'],
+      isActive: json['isActive'] == 1,
       roles: json['roles'],
     );
   }

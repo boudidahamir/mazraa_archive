@@ -20,19 +20,27 @@ class LocalStorageService {
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, _dbName);
+    print('Initializing database at: $path');
+    print('Database path exists: ${await databaseExists(path)}');
 
-    return await openDatabase(
+    final db = await openDatabase(
       path,
       version: _dbVersion,
       onCreate: _createTables,
       onUpgrade: _upgradeDatabase,
       onDowngrade: onDatabaseDowngradeDelete,
     );
+    
+    print('Database opened successfully');
+    return db;
   }
 
   Future<void> _upgradeDatabase(
       Database db, int oldVersion, int newVersion) async {
+    print('Upgrading database from version $oldVersion to $newVersion');
+    
     if (oldVersion < 2) {
+      print('Performing upgrade for version < 2');
       // Rename old table to temp
       await db.execute(
           'ALTER TABLE storage_locations RENAME TO temp_storage_locations');
@@ -113,10 +121,13 @@ class LocalStorageService {
         user_id INTEGER
       )
     ''');
+      print('Upgrade completed successfully');
     }
   }
 
   Future<void> _createTables(Database db, int version) async {
+    print('Creating tables for version: $version');
+    
     // Documents table
     await db.execute('''
       CREATE TABLE documents (
@@ -138,6 +149,7 @@ class LocalStorageService {
         sync_status TEXT NOT NULL
       )
     ''');
+    print('Documents table created');
 
     // Storage locations table
     await db.execute('''
@@ -160,6 +172,7 @@ class LocalStorageService {
 )
 
     ''');
+    print('Storage locations table created');
 
     // Sync logs table
     await db.execute('''
@@ -174,6 +187,7 @@ class LocalStorageService {
         synced INTEGER NOT NULL
       )
     ''');
+    print('Sync logs table created');
 
     // Generated barcodes table
     await db.execute('''
@@ -187,6 +201,7 @@ class LocalStorageService {
         sync_status TEXT NOT NULL
       )
     ''');
+    print('Generated barcodes table created');
 
     await db.execute('''
   CREATE TABLE document_types (
@@ -200,6 +215,7 @@ class LocalStorageService {
     updated_by_id INTEGER
   )
 ''');
+    print('Document types table created');
 
     await db.execute('''
   CREATE TABLE users (
@@ -218,6 +234,16 @@ class LocalStorageService {
     roles TEXT
   )
 ''');
+    print('Users table created');
+
+    await db.execute('''
+  CREATE TABLE current_user (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER
+  )
+''');
+    print('Current user table created');
+    print('All tables created successfully');
   }
 
   // Document operations
@@ -438,25 +464,20 @@ class LocalStorageService {
 
   Future<void> saveDocumentType(DocumentType type) async {
     final db = await database;
-    Future<void> saveDocumentType(DocumentType type) async {
-      final db = await database;
-      await db.insert(
-        'document_types',
-        {
-          'id': type.id,
-          'name': type.name,
-          'code': type.code,
-          'description': type.description,
-          'created_at': type.createdAt.toIso8601String(),
-          'updated_at': type.updatedAt.toIso8601String(),
-          'created_by_id': type.createdById,
-          'updated_by_id': type.updatedById,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace, // <-- add this line
-      );
-    }
-
-
+    await db.insert(
+      'document_types',
+      {
+        'id': type.id,
+        'name': type.name,
+        'code': type.code,
+        'description': type.description,
+        'created_at': type.createdAt.toIso8601String(),
+        'updated_at': type.updatedAt.toIso8601String(),
+        'created_by_id': type.createdById,
+        'updated_by_id': type.updatedById,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<List<Document>> getDocumentsByType(String documentType) async {
@@ -472,6 +493,7 @@ class LocalStorageService {
   // Save or update a user
   Future<void> saveUser(User user) async {
     final db = await database;
+    print('Saving user to database: ${user.toJson()}');
     await db.insert(
       'users',
       {
@@ -491,25 +513,33 @@ class LocalStorageService {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    print('User saved successfully');
   }
 
 // Get all users
   Future<List<User>> getUsers() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('users');
-    return List.generate(maps.length, (i) => User.fromJson(maps[i]));
+    return List.generate(maps.length, (i) => User.fromSqlite(maps[i]));
   }
 
 // Get user by ID
   Future<User?> getUserById(int id) async {
     final db = await database;
+    print('Getting user by ID: $id');
     final maps = await db.query(
       'users',
       where: 'id = ?',
       whereArgs: [id],
     );
-    if (maps.isEmpty) return null;
-    return User.fromJson(maps.first);
+    print('User query result: $maps');
+    if (maps.isEmpty) {
+      print('No user found with ID: $id');
+      return null;
+    }
+    final user = User.fromSqlite(maps.first);
+    print('User found: ${user.toJson()}');
+    return user;
   }
 
 // Delete user by ID
@@ -525,18 +555,55 @@ class LocalStorageService {
 // Save currently logged-in user
   Future<void> saveCurrentUserId(int userId) async {
     final db = await database;
+    print('Saving current user ID: $userId');
     await db.execute(
         'CREATE TABLE IF NOT EXISTS current_user (id INTEGER PRIMARY KEY, user_id INTEGER)');
     await db.delete('current_user');
     await db.insert('current_user', {'id': 1, 'user_id': userId});
+    print('Current user ID saved successfully');
   }
 
   Future<User?> getCurrentUser() async {
     final db = await database;
+    print('Getting current user...');
     final result = await db.query('current_user');
-    if (result.isEmpty) return null;
-    return getUserById(result.first['user_id'] as int);
+    print('Current user query result: $result');
+    if (result.isEmpty) {
+      print('No current user found in database');
+      return null;
+    }
+    final userId = result.first['user_id'] as int;
+    print('Found current user ID: $userId');
+    final user = await getUserById(userId);
+    print('Retrieved user: ${user?.toJson()}');
+    return user;
   }
 
-  
+  // Method to clear database for testing
+  Future<void> clearDatabase() async {
+    final db = await database;
+    await db.delete('users');
+    await db.delete('current_user');
+    print('Database cleared');
+  }
+
+  // Method to debug database contents
+  Future<void> debugDatabase() async {
+    final db = await database;
+    print('=== Database Debug Info ===');
+    
+    // Check if tables exist
+    final tables = await db.query('sqlite_master', where: 'type = ?', whereArgs: ['table']);
+    print('Tables in database: ${tables.map((t) => t['name']).toList()}');
+    
+    // Check users table
+    final users = await db.query('users');
+    print('Users in database: $users');
+    
+    // Check current_user table
+    final currentUser = await db.query('current_user');
+    print('Current user in database: $currentUser');
+    
+    print('=== End Debug Info ===');
+  }
 }

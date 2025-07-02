@@ -39,7 +39,7 @@ class _DocumentSearchBarState extends State<DocumentSearchBar> {
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          hintText: 'Search documents...',
+          hintText: 'Rechercher des documents...',
           prefixIcon: const Icon(Icons.search),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
@@ -51,12 +51,9 @@ class _DocumentSearchBarState extends State<DocumentSearchBar> {
                 )
               : null,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         ),
         onChanged: _onSearchChanged,
       ),

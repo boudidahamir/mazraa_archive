@@ -38,7 +38,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to load documents';
+        _errorMessage = 'Échec de la chargement des documents';
       });
     } finally {
       setState(() {
@@ -62,6 +62,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
             onPressed: () {
               // TODO: Navigate to add document screen
             },
+            tooltip: 'Ajouter un document',
           ),
         ],
       ),
@@ -83,14 +84,14 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: _loadDocuments,
-                              child: const Text('Retry'),
+                              child: const Text('Réessayer'),
                             ),
                           ],
                         ),
                       )
                     : _documents.isEmpty
                         ? const Center(
-                            child: Text('No documents found'),
+                            child: Text('Aucun document trouvé'),
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.all(16),

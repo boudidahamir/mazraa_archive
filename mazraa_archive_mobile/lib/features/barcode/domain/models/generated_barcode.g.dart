@@ -6,6 +6,10 @@ part of 'generated_barcode.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+import 'package:mazraa_archive_mobile/core/models/document_type.dart';
+
+import 'generated_barcode.dart';
+
 GeneratedBarcode _$GeneratedBarcodeFromJson(Map<String, dynamic> json) =>
     GeneratedBarcode(
       barcode: json['barcode'] as String,

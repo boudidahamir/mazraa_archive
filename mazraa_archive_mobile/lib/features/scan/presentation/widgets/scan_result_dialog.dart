@@ -23,32 +23,9 @@ class ScanResultDialog extends StatelessWidget {
     return AlertDialog(
       title: Row(
         children: [
-          const Text('Document Details'),
-          if (!isOnline) ...[
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.cloud_off, size: 16, color: Colors.orange),
-                  SizedBox(width: 4),
-                  Text(
-                    'Offline',
-                    style: TextStyle(
-                      color: Colors.orange,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          const Icon(Icons.description_outlined, color: Colors.blue),
+          const SizedBox(width: 8),
+          const Text('Détails du document'),
         ],
       ),
       content: SingleChildScrollView(
@@ -71,7 +48,7 @@ class ScanResultDialog extends StatelessWidget {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'You are viewing cached data. Changes will sync when online.',
+                        'Vous consultez des données en cache. Les modifications seront synchronisées lorsque vous serez en ligne.',
                         style: TextStyle(
                           color: Colors.orange,
                           fontSize: 12,
@@ -83,21 +60,21 @@ class ScanResultDialog extends StatelessWidget {
               ),
             _buildInfoSection(
               context,
-              'Document Information',
+              'Informations du document',
               [
                 _buildInfoRow('Type', document.documentTypeName),
-                _buildInfoRow('Title', document.title),
+                _buildInfoRow('Titre', document.title),
                 if (document.description != null)
                   _buildInfoRow('Description', document.description!),
-                _buildInfoRow('Status', document.status),
+                _buildInfoRow('Statut', document.status),
                 _buildInfoRow(
-                  'Created',
-                  '${document.createdAt.day}/${document.createdAt.month}/${document.createdAt.year}',
+                  'Créé le',
+                  '${document.createdAt.day.toString().padLeft(2, '0')}/${document.createdAt.month.toString().padLeft(2, '0')}/${document.createdAt.year}',
                 ),
                 if (document.updatedAt != null)
                   _buildInfoRow(
-                    'Last Updated',
-                    '${document.updatedAt!.day}/${document.updatedAt!.month}/${document.updatedAt!.year}',
+                    'Dernière modification',
+                    '${document.updatedAt!.day.toString().padLeft(2, '0')}/${document.updatedAt!.month.toString().padLeft(2, '0')}/${document.updatedAt!.year}',
                   ),
               ],
             ),
@@ -105,16 +82,16 @@ class ScanResultDialog extends StatelessWidget {
             if (document.storageLocationId != null)
               _buildInfoSection(
                 context,
-                'Storage Location',
+                'Emplacement de stockage',
                 [
                   _buildInfoRow('Code', document.storageLocationCode),
                   if (storageLocation != null) ...[
-                    _buildInfoRow('Name', storageLocation!.name),
-                    _buildInfoRow('Shelf', storageLocation!.shelf),
-                    _buildInfoRow('Row', storageLocation!.row),
-                    _buildInfoRow('Box', storageLocation!.box),
+                    _buildInfoRow('Nom', storageLocation!.name),
+                    _buildInfoRow('Étagère', storageLocation!.shelf),
+                    _buildInfoRow('Rangée', storageLocation!.row),
+                    _buildInfoRow('Boîte', storageLocation!.box),
                     _buildInfoRow(
-                      'Space Used',
+                      'Espace utilisé',
                       '${storageLocation!.usedSpace}/${storageLocation!.capacity}',
                     ),
                   ],
@@ -128,13 +105,13 @@ class ScanResultDialog extends StatelessWidget {
         TextButton.icon(
           onPressed: onClose,
           icon: const Icon(Icons.close),
-          label: const Text('Close'),
+          label: const Text('Fermer'),
         ),
         if (document.storageLocationId == null)
           ElevatedButton.icon(
             onPressed: onAssignLocation,
             icon: const Icon(Icons.storage),
-            label: const Text('Assign Location'),
+            label: const Text('Assigner l\'emplacement'),
           ),
       ],
     );

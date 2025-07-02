@@ -52,6 +52,17 @@ class ApiService {
     await _storage.delete(key: 'auth_token');
   }
 
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    final response = await _dio.post('/auth/change-password', data: {
+      'currentPassword': currentPassword,
+      'newPassword': newPassword,
+    });
+    
+    if (response.statusCode != 200) {
+      throw Exception('Failed to change password');
+    }
+  }
+
   // Documents
   Future<List<Document>> getDocuments() async {
     final response = await _dio.get('/documents');
@@ -200,8 +211,12 @@ class ApiService {
 
   // Fetch current user profile
   Future<User> getCurrentUserProfile() async {
+    print('Fetching current user profile from API...');
     final response = await _dio.get('/auth/me');
-    return User.fromJson(response.data);
+    print('API response: ${response.data}');
+    final user = User.fromJson(response.data);
+    print('Parsed user: ${user.toJson()}');
+    return user;
   }
 
 } 
