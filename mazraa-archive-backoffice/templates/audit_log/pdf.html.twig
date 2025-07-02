@@ -78,15 +78,58 @@
                     <td>{{ log.createdAt|date('d/m/Y H:i:s') }}</td>
                     <td>{{ log.username }}</td>
                     <td>
+                        {% set actionLabels = {
+                            'CREATE': 'Création',
+                            'UPDATE': 'Modification',
+                            'DELETE': 'Suppression',
+                            'LOGIN': 'Connexion',
+                            'LOGOUT': 'Déconnexion',
+                            'CREATE_DOCUMENT': 'Création de document',
+                            'UPDATE_DOCUMENT': 'Modification de document',
+                            'DELETE_DOCUMENT': 'Suppression de document',
+                            'CREATE_USER': 'Création d\'utilisateur',
+                            'UPDATE_USER': 'Modification d\'utilisateur',
+                            'DELETE_USER': 'Suppression d\'utilisateur',
+                            'CHANGE_PASSWORD': 'Changement de mot de passe',
+                            'CREATE_STORAGE_LOCATION': 'Création d\'emplacement',
+                            'UPDATE_STORAGE_LOCATION': 'Modification d\'emplacement',
+                            'DELETE_STORAGE_LOCATION': 'Suppression d\'emplacement',
+                            'GENERATE_BARCODE': 'Génération de code-barres',
+                            'GENERATE_BARCODE_IMAGE': 'Génération d\'image de code-barres',
+                            'VALIDATE_BARCODE': 'Validation de code-barres',
+                            'SYNC_CHANGES': 'Synchronisation',
+                            'MARK_SYNCED': 'Marqué comme synchronisé',
+                            'RESOLVE_CONFLICT': 'Résolution de conflit',
+                            'ARCHIVE': 'Archivage',
+                            'DESTROY': 'Destruction'
+                        } %}
                         {% set actionInfo = {
                             'CREATE': {class: 'bg-success'},
                             'UPDATE': {class: 'bg-warning'},
                             'DELETE': {class: 'bg-danger'},
                             'LOGIN': {class: 'bg-info'},
-                            'LOGOUT': {class: 'bg-secondary'}
+                            'LOGOUT': {class: 'bg-secondary'},
+                            'CREATE_DOCUMENT': {class: 'bg-success'},
+                            'UPDATE_DOCUMENT': {class: 'bg-warning'},
+                            'DELETE_DOCUMENT': {class: 'bg-danger'},
+                            'CREATE_USER': {class: 'bg-success'},
+                            'UPDATE_USER': {class: 'bg-warning'},
+                            'DELETE_USER': {class: 'bg-danger'},
+                            'CHANGE_PASSWORD': {class: 'bg-info'},
+                            'CREATE_STORAGE_LOCATION': {class: 'bg-success'},
+                            'UPDATE_STORAGE_LOCATION': {class: 'bg-warning'},
+                            'DELETE_STORAGE_LOCATION': {class: 'bg-danger'},
+                            'GENERATE_BARCODE': {class: 'bg-info'},
+                            'GENERATE_BARCODE_IMAGE': {class: 'bg-info'},
+                            'VALIDATE_BARCODE': {class: 'bg-info'},
+                            'SYNC_CHANGES': {class: 'bg-info'},
+                            'MARK_SYNCED': {class: 'bg-info'},
+                            'RESOLVE_CONFLICT': {class: 'bg-warning'},
+                            'ARCHIVE': {class: 'bg-secondary'},
+                            'DESTROY': {class: 'bg-danger'}
                         } %}
                         {% set info = actionInfo[log.action]|default({class: 'bg-light'}) %}
-                        <span class="badge {{ info.class }}">{{ log.action }}</span>
+                        <span class="badge {{ info.class }}">{{ actionLabels[log.action]|default(log.action) }}</span>
                     </td>
                     <td>{{ log.entityType }}</td>
                     <td>{{ log.entityId }}</td>

@@ -60,14 +60,19 @@ class Document
 
     public function toApiRequest(): array
     {
-        return [
+        $data = [
             'title' => $this->title,
             'documentTypeId' => $this->documentType ? (int)$this->documentType : null,
             'status' => $this->status,
             'description' => $this->description,
-            'barcode' => $this->barcode,
-            'storageLocationId' => $this->storageLocation ? (int)$this->storageLocation : null
         ];
+        if ($this->barcode) {
+            $data['barcode'] = $this->barcode;
+        }
+        if ($this->storageLocation) {
+            $data['storageLocationId'] = (int)$this->storageLocation;
+        }
+        return $data;
     }
 
 

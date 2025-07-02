@@ -23,7 +23,6 @@
 
 # Local config files
 application.yml
-application.properties
 
 # Maven
 .mvn/
@@ -73,7 +72,6 @@ pubspec.lock
 
 # Android
 **/android/.gradle/
-**/android/app/build/
 **/android/local.properties
 **/android/.idea/
 

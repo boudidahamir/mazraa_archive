@@ -137,6 +137,24 @@
                             <option value="DELETE" {% if action == 'DELETE' %}selected{% endif %}>Suppression</option>
                             <option value="LOGIN" {% if action == 'LOGIN' %}selected{% endif %}>Connexion</option>
                             <option value="LOGOUT" {% if action == 'LOGOUT' %}selected{% endif %}>Déconnexion</option>
+                            <option value="CREATE_DOCUMENT" {% if action == 'CREATE_DOCUMENT' %}selected{% endif %}>Création de document</option>
+                            <option value="UPDATE_DOCUMENT" {% if action == 'UPDATE_DOCUMENT' %}selected{% endif %}>Modification de document</option>
+                            <option value="DELETE_DOCUMENT" {% if action == 'DELETE_DOCUMENT' %}selected{% endif %}>Suppression de document</option>
+                            <option value="CREATE_USER" {% if action == 'CREATE_USER' %}selected{% endif %}>Création d'utilisateur</option>
+                            <option value="UPDATE_USER" {% if action == 'UPDATE_USER' %}selected{% endif %}>Modification d'utilisateur</option>
+                            <option value="DELETE_USER" {% if action == 'DELETE_USER' %}selected{% endif %}>Suppression d'utilisateur</option>
+                            <option value="CHANGE_PASSWORD" {% if action == 'CHANGE_PASSWORD' %}selected{% endif %}>Changement de mot de passe</option>
+                            <option value="CREATE_STORAGE_LOCATION" {% if action == 'CREATE_STORAGE_LOCATION' %}selected{% endif %}>Création d'emplacement</option>
+                            <option value="UPDATE_STORAGE_LOCATION" {% if action == 'UPDATE_STORAGE_LOCATION' %}selected{% endif %}>Modification d'emplacement</option>
+                            <option value="DELETE_STORAGE_LOCATION" {% if action == 'DELETE_STORAGE_LOCATION' %}selected{% endif %}>Suppression d'emplacement</option>
+                            <option value="GENERATE_BARCODE" {% if action == 'GENERATE_BARCODE' %}selected{% endif %}>Génération de code-barres</option>
+                            <option value="GENERATE_BARCODE_IMAGE" {% if action == 'GENERATE_BARCODE_IMAGE' %}selected{% endif %}>Génération d'image de code-barres</option>
+                            <option value="VALIDATE_BARCODE" {% if action == 'VALIDATE_BARCODE' %}selected{% endif %}>Validation de code-barres</option>
+                            <option value="SYNC_CHANGES" {% if action == 'SYNC_CHANGES' %}selected{% endif %}>Synchronisation</option>
+                            <option value="MARK_SYNCED" {% if action == 'MARK_SYNCED' %}selected{% endif %}>Marqué comme synchronisé</option>
+                            <option value="RESOLVE_CONFLICT" {% if action == 'RESOLVE_CONFLICT' %}selected{% endif %}>Résolution de conflit</option>
+                            <option value="ARCHIVE" {% if action == 'ARCHIVE' %}selected{% endif %}>Archivage</option>
+                            <option value="DESTROY" {% if action == 'DESTROY' %}selected{% endif %}>Destruction</option>
                         </select>
                     </div>
                 </div>
@@ -245,17 +263,60 @@
                                     </div>
                                 </td>
                                 <td>
+                                    {% set actionLabels = {
+                                        'CREATE': 'Création',
+                                        'UPDATE': 'Modification',
+                                        'DELETE': 'Suppression',
+                                        'LOGIN': 'Connexion',
+                                        'LOGOUT': 'Déconnexion',
+                                        'CREATE_DOCUMENT': 'Création de document',
+                                        'UPDATE_DOCUMENT': 'Modification de document',
+                                        'DELETE_DOCUMENT': 'Suppression de document',
+                                        'CREATE_USER': 'Création d\'utilisateur',
+                                        'UPDATE_USER': 'Modification d\'utilisateur',
+                                        'DELETE_USER': 'Suppression d\'utilisateur',
+                                        'CHANGE_PASSWORD': 'Changement de mot de passe',
+                                        'CREATE_STORAGE_LOCATION': 'Création d\'emplacement',
+                                        'UPDATE_STORAGE_LOCATION': 'Modification d\'emplacement',
+                                        'DELETE_STORAGE_LOCATION': 'Suppression d\'emplacement',
+                                        'GENERATE_BARCODE': 'Génération de code-barres',
+                                        'GENERATE_BARCODE_IMAGE': 'Génération d\'image de code-barres',
+                                        'VALIDATE_BARCODE': 'Validation de code-barres',
+                                        'SYNC_CHANGES': 'Synchronisation',
+                                        'MARK_SYNCED': 'Marqué comme synchronisé',
+                                        'RESOLVE_CONFLICT': 'Résolution de conflit',
+                                        'ARCHIVE': 'Archivage',
+                                        'DESTROY': 'Destruction'
+                                    } %}
                                     {% set actionInfo = {
                                         'CREATE': {class: 'bg-success', icon: 'plus-circle'},
                                         'UPDATE': {class: 'bg-warning', icon: 'edit'},
                                         'DELETE': {class: 'bg-danger', icon: 'trash-alt'},
                                         'LOGIN': {class: 'bg-info', icon: 'sign-in-alt'},
-                                        'LOGOUT': {class: 'bg-secondary', icon: 'sign-out-alt'}
+                                        'LOGOUT': {class: 'bg-secondary', icon: 'sign-out-alt'},
+                                        'CREATE_DOCUMENT': {class: 'bg-success', icon: 'plus-circle'},
+                                        'UPDATE_DOCUMENT': {class: 'bg-warning', icon: 'edit'},
+                                        'DELETE_DOCUMENT': {class: 'bg-danger', icon: 'trash-alt'},
+                                        'CREATE_USER': {class: 'bg-success', icon: 'user-plus'},
+                                        'UPDATE_USER': {class: 'bg-warning', icon: 'user-edit'},
+                                        'DELETE_USER': {class: 'bg-danger', icon: 'user-times'},
+                                        'CHANGE_PASSWORD': {class: 'bg-info', icon: 'key'},
+                                        'CREATE_STORAGE_LOCATION': {class: 'bg-success', icon: 'warehouse'},
+                                        'UPDATE_STORAGE_LOCATION': {class: 'bg-warning', icon: 'warehouse'},
+                                        'DELETE_STORAGE_LOCATION': {class: 'bg-danger', icon: 'warehouse'},
+                                        'GENERATE_BARCODE': {class: 'bg-info', icon: 'barcode'},
+                                        'GENERATE_BARCODE_IMAGE': {class: 'bg-info', icon: 'barcode'},
+                                        'VALIDATE_BARCODE': {class: 'bg-info', icon: 'barcode'},
+                                        'SYNC_CHANGES': {class: 'bg-info', icon: 'sync'},
+                                        'MARK_SYNCED': {class: 'bg-info', icon: 'check'},
+                                        'RESOLVE_CONFLICT': {class: 'bg-warning', icon: 'exclamation-triangle'},
+                                        'ARCHIVE': {class: 'bg-secondary', icon: 'archive'},
+                                        'DESTROY': {class: 'bg-danger', icon: 'bomb'}
                                     } %}
                                     {% set info = actionInfo[log.action]|default({class: 'bg-primary', icon: 'circle'}) %}
                                     <span class="badge {{ info.class }}">
                                         <i class="fas fa-{{ info.icon }} me-1"></i>
-                                        {{ log.action }}
+                                        {{ actionLabels[log.action]|default(log.action) }}
                                     </span>
                                 </td>
                                 <td>

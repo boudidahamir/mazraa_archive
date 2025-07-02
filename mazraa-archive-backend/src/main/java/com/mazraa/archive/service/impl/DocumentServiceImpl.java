@@ -40,9 +40,10 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public DocumentDTO createDocument(DocumentCreateRequest request, Long userId) {
         // Only check barcode if it's provided
-        if (request.getBarcode() != null && !request.getBarcode().isEmpty() && 
-            documentRepository.existsByBarcode(request.getBarcode())) {
-            throw new ResourceAlreadyExistsException("Document with barcode " + request.getBarcode() + " already exists");
+        if (request.getBarcode() != null && !request.getBarcode().isEmpty()) {
+            if (documentRepository.existsByBarcode(request.getBarcode())) {
+                throw new ResourceAlreadyExistsException("Document with barcode " + request.getBarcode() + " already exists");
+            }
         }
 
         DocumentType documentType = documentTypeRepository.findById(request.getDocumentTypeId())
@@ -60,10 +61,10 @@ public class DocumentServiceImpl implements DocumentService {
 
         Document document = new Document();
         document.setDocumentType(documentType);
-        document.setBarcode(request.getBarcode());
+        document.setBarcode(request.getBarcode() != null ? request.getBarcode() : null);
         document.setTitle(request.getTitle());
         document.setDescription(request.getDescription());
-        document.setStorageLocation(storageLocation);
+        document.setStorageLocation(storageLocation != null ? storageLocation : null);
         document.setStatus(request.getStatus());
         document.setArchived(false);
         document.setCreatedBy(user);

@@ -40,6 +40,7 @@ public class DocumentController {
     public ResponseEntity<DocumentDTO> createDocument(
             @Valid @RequestBody DocumentCreateRequest request,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                
         return ResponseEntity.ok(documentService.createDocument(request, userDetails.getId()));
     }
 
