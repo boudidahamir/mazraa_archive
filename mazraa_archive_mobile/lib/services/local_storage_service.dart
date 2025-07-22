@@ -9,7 +9,7 @@ import '../features/barcode/domain/models/generated_barcode.dart';
 class LocalStorageService {
   static Database? _database;
   static const String _dbName = 'mazraa_archive.db';
-  static const int _dbVersion = 3;
+  static const int _dbVersion = 4;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -122,6 +122,49 @@ class LocalStorageService {
       )
     ''');
       print('Upgrade completed successfully');
+    }
+
+    if (oldVersion < 4) {
+      print('Upgrading for version < 4: Make barcode nullable in documents');
+      // 1. Rename old table
+      await db.execute('ALTER TABLE documents RENAME TO temp_documents');
+      // 2. Recreate documents table with barcode nullable
+      await db.execute('''
+        CREATE TABLE documents (
+          id INTEGER PRIMARY KEY,
+          document_type TEXT NOT NULL,
+          barcode TEXT,
+          title TEXT NOT NULL,
+          description TEXT,
+          status TEXT NOT NULL,
+          storage_location TEXT,
+          file_path TEXT,
+          file_type TEXT,
+          file_size INTEGER,
+          archived INTEGER NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT,
+          created_by_id INTEGER,
+          updated_by_id INTEGER,
+          sync_status TEXT NOT NULL
+        )
+      ''');
+      // 3. Copy data
+      await db.execute('''
+        INSERT INTO documents (
+          id, document_type, barcode, title, description, status, storage_location,
+          file_path, file_type, file_size, archived, created_at, updated_at,
+          created_by_id, updated_by_id, sync_status
+        )
+        SELECT
+          id, document_type, barcode, title, description, status, storage_location,
+          file_path, file_type, file_size, archived, created_at, updated_at,
+          created_by_id, updated_by_id, sync_status
+        FROM temp_documents
+      ''');
+      // 4. Drop old table
+      await db.execute('DROP TABLE temp_documents');
+      print('Barcode column is now nullable!');
     }
   }
 

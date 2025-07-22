@@ -144,7 +144,7 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
       final newDocument = Document(
         id: 0, // Will be assigned by server
         title: _titleController.text.trim(),
-        barcode: '', // Will be generated later
+        barcode: null, // Always send null for new document creation
         description: _descriptionController.text.trim(),
         status: _statusMap[_selectedStatus]!,
         documentTypeId: _selectedDocumentType!.id,
@@ -621,8 +621,10 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
                           ),
                         ],
                         const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          alignment: WrapAlignment.center,
                           children: [
                             ElevatedButton.icon(
                               onPressed: _isSavingBarcode ? null : _saveBarcode,
@@ -644,6 +646,35 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
                               },
                               icon: const Icon(Icons.share),
                               label: const Text('Partager'),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _titleController.text = _createdDocument!.title;
+                                  _descriptionController.text = _createdDocument!.description ?? '';
+                                  _selectedStatus = _statusMap.entries
+                                      .firstWhere((e) => e.value == _createdDocument!.status,
+                                                  orElse: () => MapEntry('Actif', 'ACTIVE'))
+                                      .key;
+                                  _selectedDocumentType = _documentTypes.firstWhere(
+                                      (type) => type.id == _createdDocument!.documentTypeId,
+                                      orElse: () => _documentTypes.first);
+                                  _selectedLocation = _locations.firstWhere(
+                                      (loc) => loc.id == _createdDocument!.storageLocationId,
+                                      orElse: () => _locations.first);
+                                  _createdDocument = null; // Go back to form mode
+                                  _generatedBarcode = null;
+                                  // Reset for new creation
+                                  // (ID and barcode will be set to 0/null/empty in _createDocument)
+                                });
+                              },
+                              icon: const Icon(Icons.edit),
+                              label: const Text('Modifier le document'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
                             ),
                           ],
                         ),

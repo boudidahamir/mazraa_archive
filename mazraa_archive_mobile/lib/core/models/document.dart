@@ -9,15 +9,15 @@ part 'document.g.dart';
 class Document {
   final int id;
   final String title;
-  final String barcode;
+  final String? barcode;
   final String? description;
   final String status;
 
   final int documentTypeId;
   final String documentTypeName;
 
-  final int storageLocationId;
-  final String storageLocationCode;
+  final int? storageLocationId;
+  final String? storageLocationCode;
 
   final bool archived;
   final DateTime? archivedAt;
@@ -37,13 +37,13 @@ class Document {
   Document({
     required this.id,
     required this.title,
-    required this.barcode,
+    this.barcode,
     this.description,
     required this.status,
     required this.documentTypeId,
     required this.documentTypeName,
-    required this.storageLocationId,
-    required this.storageLocationCode,
+    this.storageLocationId,
+    this.storageLocationCode,
     required this.archived,
     this.archivedAt,
     this.archivedById,

@@ -9,13 +9,13 @@ part of 'document.dart';
 Document _$DocumentFromJson(Map<String, dynamic> json) => Document(
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,
-      barcode: json['barcode'] as String,
+      barcode: json['barcode'] as String?,
       description: json['description'] as String?,
       status: json['status'] as String,
       documentTypeId: (json['documentTypeId'] as num).toInt(),
       documentTypeName: json['documentTypeName'] as String,
-      storageLocationId: (json['storageLocationId'] as num).toInt(),
-      storageLocationCode: json['storageLocationCode'] as String,
+      storageLocationId: (json['storageLocationId'] as num?)?.toInt(),
+      storageLocationCode: json['storageLocationCode'] as String?,
       archived: json['archived'] as bool,
       archivedAt: json['archivedAt'] == null
           ? null

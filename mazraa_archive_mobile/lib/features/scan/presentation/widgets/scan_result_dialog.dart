@@ -84,7 +84,7 @@ class ScanResultDialog extends StatelessWidget {
                 context,
                 'Emplacement de stockage',
                 [
-                  _buildInfoRow('Code', document.storageLocationCode),
+                  _buildInfoRow('Code', document.storageLocationCode ?? ""),
                   if (storageLocation != null) ...[
                     _buildInfoRow('Nom', storageLocation!.name),
                     _buildInfoRow('Étagère', storageLocation!.shelf),
