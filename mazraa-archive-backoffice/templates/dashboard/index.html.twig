@@ -167,14 +167,58 @@
                                 {% for log in recentActivity %}
                                     <tr>
                                         <td>
+                                            {% set actionLabels = {
+                                                'CREATE': 'Création',
+                                                'UPDATE': 'Modification',
+                                                'DELETE': 'Suppression',
+                                                'LOGIN': 'Connexion',
+                                                'LOGOUT': 'Déconnexion',
+                                                'CREATE_DOCUMENT': 'Création de document',
+                                                'UPDATE_DOCUMENT': 'Modification de document',
+                                                'DELETE_DOCUMENT': 'Suppression de document',
+                                                'CREATE_USER': 'Création d\'utilisateur',
+                                                'UPDATE_USER': 'Modification d\'utilisateur',
+                                                'DELETE_USER': 'Suppression d\'utilisateur',
+                                                'CHANGE_PASSWORD': 'Changement de mot de passe',
+                                                'CREATE_STORAGE_LOCATION': 'Création d\'emplacement',
+                                                'UPDATE_STORAGE_LOCATION': 'Modification d\'emplacement',
+                                                'DELETE_STORAGE_LOCATION': 'Suppression d\'emplacement',
+                                                'GENERATE_BARCODE': 'Génération de code-barres',
+                                                'GENERATE_BARCODE_IMAGE': 'Génération d\'image de code-barres',
+                                                'VALIDATE_BARCODE': 'Validation de code-barres',
+                                                'SYNC_CHANGES': 'Synchronisation',
+                                                'MARK_SYNCED': 'Marqué comme synchronisé',
+                                                'RESOLVE_CONFLICT': 'Résolution de conflit',
+                                                'ARCHIVE': 'Archivage',
+                                                'DESTROY': 'Destruction'
+                                            } %}
                                             {% set icon = {
                                                 'CREATE': 'plus-circle text-success',
                                                 'UPDATE': 'edit text-warning',
                                                 'DELETE': 'trash-alt text-danger',
-                                                'ARCHIVE': 'archive text-info'
+                                                'ARCHIVE': 'archive text-info',
+                                                'CREATE_DOCUMENT': 'plus-circle text-success',
+                                                'UPDATE_DOCUMENT': 'edit text-warning',
+                                                'DELETE_DOCUMENT': 'trash-alt text-danger',
+                                                'CREATE_USER': 'user-plus text-success',
+                                                'UPDATE_USER': 'user-edit text-warning',
+                                                'DELETE_USER': 'user-times text-danger',
+                                                'CHANGE_PASSWORD': 'key text-info',
+                                                'CREATE_STORAGE_LOCATION': 'warehouse text-success',
+                                                'UPDATE_STORAGE_LOCATION': 'warehouse text-warning',
+                                                'DELETE_STORAGE_LOCATION': 'warehouse text-danger',
+                                                'GENERATE_BARCODE': 'barcode text-info',
+                                                'GENERATE_BARCODE_IMAGE': 'barcode text-info',
+                                                'VALIDATE_BARCODE': 'barcode text-info',
+                                                'SYNC_CHANGES': 'sync text-info',
+                                                'MARK_SYNCED': 'check text-info',
+                                                'RESOLVE_CONFLICT': 'exclamation-triangle text-warning',
+                                                'DESTROY': 'bomb text-danger',
+                                                'LOGIN': 'sign-in-alt text-info',
+                                                'LOGOUT': 'sign-out-alt text-secondary'
                                             } %}
                                             <i class="fas fa-{{ icon[log.action] ?? 'circle' }} me-2"></i>
-                                            {{ log.action }}
+                                            {{ actionLabels[log.action]|default(log.action) }}
                                         </td>
                                         <td>{{ log.username }}</td>
                                         <td>{{ log.details }}</td>
